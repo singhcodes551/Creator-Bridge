@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CreatorBridge — Find Your Creative Team</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d; --bg2: #141414; --bg3: #1c1c1c;
+    --border: rgba(255,255,255,0.08); --border-hover: rgba(255,255,255,0.18);
+    --accent: #F0A500; --accent2: #ff6b35;
+    --text: #f0ede8; --text-muted: #888; --text-dim: #555; --card-bg: #161616;
+    --font-display: 'Syne', sans-serif; --font-body: 'DM Sans', sans-serif;
+    --radius: 12px; --radius-sm: 8px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; line-height: 1.6; min-height: 100vh; overflow-x: hidden; }
+
+  /* NAV */
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 64px; background: rgba(13,13,13,0.85); backdrop-filter: blur(16px); border-bottom: 0.5px solid var(--border); }
+  .logo { font-family: var(--font-display); font-size: 20px; font-weight: 800; letter-spacing: -0.5px; color: var(--text); cursor: pointer; }
+  .logo span { color: var(--accent); }
+  .nav-links { display: flex; align-items: center; gap: 32px; list-style: none; }
+  .nav-links a { font-size: 13.5px; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-actions { display: flex; gap: 10px; align-items: center; }
+  .btn-ghost { font-family: var(--font-body); font-size: 13px; background: none; border: 0.5px solid var(--border-hover); color: var(--text-muted); padding: 8px 18px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; }
+  .btn-ghost:hover { color: var(--text); background: var(--bg3); }
+  .btn-primary { font-family: var(--font-body); font-size: 13px; font-weight: 500; background: var(--accent); color: #0d0d0d; border: none; padding: 8px 20px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; }
+  .btn-primary:hover { background: #ffb520; transform: translateY(-1px); }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* HERO */
+  #hero-section { padding: 140px 40px 80px; position: relative; overflow: hidden; }
+  .hero-glow { position: absolute; top: -80px; left: 50%; transform: translateX(-50%); width: 700px; height: 400px; background: radial-gradient(ellipse, rgba(240,165,0,0.12) 0%, transparent 70%); pointer-events: none; }
+  .hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); background: rgba(240,165,0,0.1); border: 0.5px solid rgba(240,165,0,0.25); padding: 6px 14px; border-radius: 99px; margin-bottom: 28px; }
+  .hero-eyebrow::before { content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+  .hero-title { font-family: var(--font-display); font-size: clamp(44px, 6vw, 80px); font-weight: 800; line-height: 1.0; letter-spacing: -2px; color: var(--text); max-width: 800px; margin-bottom: 24px; }
+  .hero-title em { font-style: normal; color: var(--accent); }
+  .hero-sub { font-size: 17px; color: var(--text-muted); max-width: 480px; line-height: 1.7; margin-bottom: 40px; font-weight: 300; }
+  .hero-search { display: flex; max-width: 560px; background: var(--bg3); border: 0.5px solid var(--border-hover); border-radius: var(--radius); overflow: hidden; margin-bottom: 20px; transition: border-color 0.2s; }
+  .hero-search:focus-within { border-color: var(--accent); }
+  .hero-search input { flex: 1; background: none; border: none; outline: none; padding: 16px 20px; font-size: 14px; color: var(--text); font-family: var(--font-body); }
+  .hero-search input::placeholder { color: var(--text-dim); }
+  .hero-search button { background: var(--accent); color: #0d0d0d; border: none; padding: 16px 28px; font-family: var(--font-display); font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+  .hero-search button:hover { background: #ffb520; }
+  .hero-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+  .hero-tag { font-size: 12px; padding: 5px 13px; border: 0.5px solid var(--border); border-radius: 99px; color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
+  .hero-tag:hover { border-color: var(--accent); color: var(--accent); }
+  .hero-stats { display: flex; gap: 48px; margin-top: 64px; padding-top: 40px; border-top: 0.5px solid var(--border); flex-wrap: wrap; }
+  .hero-stat-num { font-family: var(--font-display); font-size: 32px; font-weight: 800; color: var(--text); letter-spacing: -1px; }
+  .hero-stat-num span { color: var(--accent); }
+  .hero-stat-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+  /* TICKER */
+  .ticker-wrap { overflow: hidden; padding: 16px 0; border-top: 0.5px solid var(--border); border-bottom: 0.5px solid var(--border); background: var(--bg2); }
+  .ticker { display: flex; animation: ticker 22s linear infinite; white-space: nowrap; }
+  .ticker-item { display: inline-flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); padding: 0 32px; }
+  .ticker-item::before { content: '✦'; color: var(--accent); font-size: 8px; }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  .section { padding: 80px 40px; }
+  .section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+  .section-title { font-family: var(--font-display); font-size: clamp(28px, 3.5vw, 42px); font-weight: 800; letter-spacing: -1px; color: var(--text); margin-bottom: 40px; line-height: 1.1; }
+  .section-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+
+  .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+  .filter-pill { font-family: var(--font-body); font-size: 12.5px; padding: 7px 16px; border-radius: 99px; border: 0.5px solid var(--border); color: var(--text-muted); background: none; cursor: pointer; transition: all 0.15s; }
+  .filter-pill:hover { border-color: var(--border-hover); color: var(--text); }
+  .filter-pill.active { background: var(--accent); color: #0d0d0d; border-color: var(--accent); font-weight: 500; }
+
+  /* FREELANCER CARDS */
+  .freelancer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .fcard { background: var(--card-bg); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 22px; cursor: pointer; transition: border-color 0.2s, transform 0.2s; position: relative; overflow: hidden; }
+  .fcard::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); opacity: 0; transition: opacity 0.2s; }
+  .fcard:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+  .fcard:hover::before { opacity: 1; }
+  .fcard-top { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .fcard-avatar { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 15px; font-weight: 700; flex-shrink: 0; }
+  .fcard-name { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--text); }
+  .fcard-role { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .fcard-badge { display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: 99px; margin-bottom: 10px; font-weight: 500; }
+  .fcard-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px; font-weight: 300; }
+  .fcard-footer { display: flex; align-items: center; justify-content: space-between; }
+  .fcard-rate { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--text); }
+  .fcard-stars { font-size: 12px; color: var(--accent); }
+  .fcard-avail { position: absolute; top: 16px; right: 16px; width: 8px; height: 8px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 6px rgba(74,222,128,0.6); }
+  .fcard-real-badge { position: absolute; top: 16px; right: 16px; font-size: 10px; background: rgba(240,165,0,0.15); color: var(--accent); border: 0.5px solid rgba(240,165,0,0.3); padding: 2px 8px; border-radius: 99px; font-weight: 500; }
+
+  .av-1 { background: rgba(240,165,0,0.15); color: var(--accent); }
+  .av-2 { background: rgba(255,107,53,0.15); color: var(--accent2); }
+  .av-3 { background: rgba(139,92,246,0.15); color: #a78bfa; }
+  .av-4 { background: rgba(20,184,166,0.15); color: #2dd4bf; }
+  .av-5 { background: rgba(236,72,153,0.15); color: #f472b6; }
+  .av-6 { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  .badge-yt { background: rgba(255,107,53,0.15); color: #ff8c5a; }
+  .badge-ig { background: rgba(236,72,153,0.12); color: #f472b6; }
+  .badge-pod { background: rgba(139,92,246,0.15); color: #a78bfa; }
+  .badge-short { background: rgba(20,184,166,0.12); color: #2dd4bf; }
+  .badge-brand { background: rgba(240,165,0,0.12); color: var(--accent); }
+
+  /* HOW IT WORKS */
+  .how-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1px; background: var(--border); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .how-card { background: var(--bg2); padding: 32px 28px; transition: background 0.2s; }
+  .how-card:hover { background: var(--bg3); }
+  .how-num { font-family: var(--font-display); font-size: 48px; font-weight: 800; color: rgba(240,165,0,0.2); line-height: 1; margin-bottom: 16px; letter-spacing: -2px; }
+  .how-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .how-desc { font-size: 13px; color: var(--text-muted); line-height: 1.65; font-weight: 300; }
+
+  /* FORMS */
+  .post-form-wrap { max-width: 680px; margin: 0 auto; }
+  .form-group { margin-bottom: 20px; }
+  .form-label { font-size: 12px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; display: block; }
+  .form-input, .form-select, .form-textarea { width: 100%; background: var(--bg3); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 13px 16px; font-family: var(--font-body); font-size: 14px; color: var(--text); outline: none; transition: border-color 0.2s; }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+  .form-input::placeholder, .form-textarea::placeholder { color: var(--text-dim); }
+  .form-select { appearance: none; cursor: pointer; }
+  .form-select option { background: var(--bg3); }
+  .form-textarea { resize: vertical; min-height: 120px; line-height: 1.6; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-submit { width: 100%; padding: 16px; font-family: var(--font-display); font-size: 15px; font-weight: 700; background: var(--accent); color: #0d0d0d; border: none; border-radius: var(--radius); cursor: pointer; letter-spacing: 0.02em; transition: all 0.2s; margin-top: 8px; }
+  .form-submit:hover { background: #ffb520; transform: translateY(-1px); }
+  .form-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .form-note { font-size: 12px; color: var(--text-dim); text-align: center; margin-top: 12px; }
+
+  /* BROWSE */
+  .profile-layout { display: grid; grid-template-columns: 260px 1fr; gap: 28px; align-items: start; }
+  .sidebar { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 24px; position: sticky; top: 88px; }
+  .sidebar-title { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; }
+  .sidebar-group { margin-bottom: 24px; }
+  .sidebar-check { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+  .sidebar-check input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px; }
+  .sidebar-check label { font-size: 13px; color: var(--text-muted); cursor: pointer; }
+  .range-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+  input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+  /* FREELANCER PROFILE PAGE */
+  .profile-hero { background: var(--bg2); border-bottom: 0.5px solid var(--border); padding: 60px 40px 40px; }
+  .profile-inner { max-width: 900px; margin: 0 auto; display: flex; gap: 36px; align-items: flex-start; flex-wrap: wrap; }
+  .profile-avatar-lg { width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 32px; font-weight: 800; flex-shrink: 0; }
+  .profile-info { flex: 1; min-width: 260px; }
+  .profile-name { font-family: var(--font-display); font-size: 36px; font-weight: 800; letter-spacing: -1px; color: var(--text); margin-bottom: 4px; }
+  .profile-tagline { font-size: 16px; color: var(--text-muted); font-weight: 300; margin-bottom: 16px; }
+  .profile-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .profile-stats { display: flex; gap: 32px; margin-top: 8px; flex-wrap: wrap; }
+  .profile-stat-n { font-family: var(--font-display); font-size: 22px; font-weight: 800; color: var(--text); }
+  .profile-stat-l { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .portfolio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 20px; }
+  .portfolio-item { background: var(--bg3); border: 0.5px solid var(--border); border-radius: var(--radius-sm); aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color 0.2s; }
+  .portfolio-item:hover { border-color: var(--accent); }
+  .portfolio-item-label { font-size: 12px; color: var(--text-dim); text-align: center; padding: 12px; }
+  .play-icon { width: 36px; height: 36px; background: rgba(240,165,0,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .review-card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 12px; }
+  .review-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .reviewer-av { width: 36px; height: 36px; border-radius: 50%; background: var(--bg3); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--text-muted); }
+  .reviewer-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .reviewer-date { font-size: 12px; color: var(--text-dim); }
+  .review-text { font-size: 13px; color: var(--text-muted); line-height: 1.65; font-weight: 300; }
+
+  /* CTA BAND */
+  .cta-band { margin: 0 40px 80px; background: var(--bg2); border: 0.5px solid var(--border); border-radius: 20px; padding: 60px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; position: relative; overflow: hidden; }
+  .cta-band::before { content: ''; position: absolute; right: -60px; top: -60px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(240,165,0,0.1) 0%, transparent 70%); }
+  .cta-title { font-family: var(--font-display); font-size: 32px; font-weight: 800; letter-spacing: -1px; color: var(--text); margin-bottom: 8px; }
+  .cta-sub { font-size: 14px; color: var(--text-muted); font-weight: 300; }
+
+  /* FOOTER */
+  footer { border-top: 0.5px solid var(--border); padding: 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+  .footer-logo { font-family: var(--font-display); font-size: 16px; font-weight: 800; color: var(--text); }
+  .footer-logo span { color: var(--accent); }
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a { font-size: 12.5px; color: var(--text-dim); text-decoration: none; transition: color 0.15s; }
+  .footer-links a:hover { color: var(--text-muted); }
+  .footer-copy { font-size: 12px; color: var(--text-dim); }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--bg3); border: 0.5px solid var(--border-hover); color: var(--text); padding: 14px 24px; border-radius: var(--radius); font-size: 14px; z-index: 999; transition: transform 0.3s ease; white-space: nowrap; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast span { color: var(--accent); margin-right: 8px; }
+
+  /* AUTH MODAL */
+  .modal-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal { background: #161616; border: 0.5px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; position: relative; transform: translateY(16px); transition: transform 0.25s; }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; transition: color 0.15s; }
+  .modal-close:hover { color: var(--text); }
+  .modal-logo { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+  .modal-logo span { color: var(--accent); }
+  .modal-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; font-weight: 300; }
+  .modal-tabs { display: flex; background: var(--bg3); border-radius: 8px; padding: 4px; margin-bottom: 24px; }
+  .modal-tab { flex: 1; padding: 8px; font-family: var(--font-body); font-size: 13px; background: none; border: none; color: var(--text-muted); cursor: pointer; border-radius: 6px; transition: all 0.15s; }
+  .modal-tab.active { background: var(--accent); color: #0d0d0d; font-weight: 500; }
+  .modal-form { display: flex; flex-direction: column; gap: 14px; }
+  .modal-input { width: 100%; background: var(--bg3); border: 0.5px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px 14px; font-family: var(--font-body); font-size: 14px; color: var(--text); outline: none; transition: border-color 0.2s; }
+  .modal-input:focus { border-color: var(--accent); }
+  .modal-input::placeholder { color: var(--text-dim); }
+  .type-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .type-btn { padding: 12px; border-radius: 8px; border: 0.5px solid rgba(255,255,255,0.08); background: none; color: var(--text-muted); font-family: var(--font-body); font-size: 13px; cursor: pointer; transition: all 0.15s; text-align: center; }
+  .type-btn.selected { border-color: var(--accent); color: var(--accent); background: rgba(240,165,0,0.08); }
+  .modal-btn { width: 100%; padding: 14px; font-family: var(--font-display); font-size: 14px; font-weight: 700; background: var(--accent); color: #0d0d0d; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s; margin-top: 4px; }
+  .modal-btn:hover { background: #ffb520; }
+  .modal-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .modal-error { font-size: 12px; color: #f87171; background: rgba(248,113,113,0.1); border: 0.5px solid rgba(248,113,113,0.2); border-radius: 6px; padding: 10px 12px; display: none; }
+  .modal-error.show { display: block; }
+  .modal-success { font-size: 13px; color: #4ade80; text-align: center; display: none; padding: 12px; background: rgba(74,222,128,0.08); border-radius: 8px; }
+  .modal-success.show { display: block; }
+  .nav-user { display: flex; align-items: center; gap: 10px; }
+  .nav-user-name { font-size: 13px; color: var(--text-muted); }
+  .nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: rgba(240,165,0,0.15); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 12px; font-weight: 700; color: var(--accent); }
+
+  /* DASHBOARD */
+  .dash-header { background: var(--bg2); border-bottom: 0.5px solid var(--border); padding: 80px 40px 40px; }
+  .dash-title { font-family: var(--font-display); font-size: 36px; font-weight: 800; letter-spacing: -1px; color: var(--text); margin-bottom: 6px; }
+  .dash-sub { font-size: 14px; color: var(--text-muted); font-weight: 300; }
+  .dash-stats { display: flex; gap: 20px; margin-top: 28px; flex-wrap: wrap; }
+  .dash-stat { background: var(--bg3); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 20px 28px; }
+  .dash-stat-n { font-family: var(--font-display); font-size: 28px; font-weight: 800; color: var(--text); }
+  .dash-stat-n span { color: var(--accent); }
+  .dash-stat-l { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+  .project-list { display: flex; flex-direction: column; gap: 12px; }
+  .project-card { background: var(--card-bg); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 24px; display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; transition: border-color 0.2s; }
+  .project-card:hover { border-color: var(--border-hover); }
+  .project-card-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .project-card-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .project-meta-tag { font-size: 11px; padding: 3px 10px; border-radius: 99px; border: 0.5px solid var(--border); color: var(--text-muted); }
+  .project-card-desc { font-size: 13px; color: var(--text-muted); font-weight: 300; line-height: 1.6; }
+  .project-card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+  .status-badge { font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 99px; }
+  .status-open { background: rgba(74,222,128,0.12); color: #4ade80; border: 0.5px solid rgba(74,222,128,0.2); }
+  .status-closed { background: rgba(255,255,255,0.05); color: var(--text-dim); border: 0.5px solid var(--border); }
+  .project-date { font-size: 12px; color: var(--text-dim); }
+  .project-budget { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--accent); }
+  .dash-empty { text-align: center; padding: 80px 20px; }
+  .dash-empty-icon { font-size: 48px; margin-bottom: 16px; }
+  .dash-empty-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .dash-empty-sub { font-size: 14px; color: var(--text-muted); font-weight: 300; margin-bottom: 24px; }
+  .dash-loading { text-align: center; padding: 60px; color: var(--text-muted); font-size: 14px; }
+
+  /* PROJECTS BOARD */
+  .pboard-list { display: flex; flex-direction: column; gap: 16px; }
+  .pboard-card { background: var(--card-bg); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 28px; transition: border-color 0.2s; }
+  .pboard-card:hover { border-color: var(--border-hover); }
+  .pboard-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+  .pboard-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .pboard-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pboard-tag { font-size: 11px; padding: 3px 10px; border-radius: 99px; border: 0.5px solid var(--border); color: var(--text-muted); }
+  .pboard-desc { font-size: 13px; color: var(--text-muted); line-height: 1.7; font-weight: 300; margin: 12px 0 20px; }
+  .pboard-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .pboard-budget { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--accent); }
+  .pboard-date { font-size: 12px; color: var(--text-dim); }
+
+  /* FREELANCER SETUP PAGE */
+  .setup-wrap { max-width: 680px; margin: 0 auto; }
+  .skills-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .skill-chip { font-size: 12px; padding: 6px 14px; border-radius: 99px; border: 0.5px solid var(--border); color: var(--text-muted); cursor: pointer; transition: all 0.15s; user-select: none; }
+  .skill-chip.selected { background: rgba(240,165,0,0.12); border-color: var(--accent); color: var(--accent); }
+  .setup-banner { background: rgba(240,165,0,0.08); border: 0.5px solid rgba(240,165,0,0.2); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 28px; font-size: 13px; color: var(--accent); }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-up { animation: fadeUp 0.5s ease both; }
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.3s; }
+  .delay-4 { animation-delay: 0.4s; }
+
+  /* PAYMENTS */
+  .payment-steps { display: flex; gap: 0; margin-bottom: 28px; }
+  .payment-step { flex: 1; text-align: center; font-size: 11px; color: var(--text-dim); padding-bottom: 10px; border-bottom: 2px solid var(--border); transition: all 0.2s; }
+  .payment-step.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+  .payment-step.done { color: #4ade80; border-bottom-color: #4ade80; }
+  .payment-amount-display { font-family: var(--font-display); font-size: 42px; font-weight: 800; color: var(--text); text-align: center; letter-spacing: -2px; margin: 20px 0; }
+  .payment-amount-display span { color: var(--accent); }
+  .payment-summary { background: var(--bg3); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 20px; }
+  .payment-summary-row { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; }
+  .payment-summary-row:not(:last-child) { border-bottom: 0.5px solid var(--border); }
+  .payment-summary-row span:first-child { color: var(--text-muted); }
+  .payment-summary-row span:last-child { color: var(--text); font-weight: 500; }
+  .payment-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+  .payment-method { padding: 12px; border: 0.5px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; text-align: center; font-size: 13px; color: var(--text-muted); transition: all 0.15s; }
+  .payment-method:hover { border-color: var(--accent); color: var(--accent); }
+  .payment-method.selected { border-color: var(--accent); color: var(--accent); background: rgba(240,165,0,0.08); }
+  .payment-method-icon { font-size: 20px; margin-bottom: 4px; }
+  .payment-success { text-align: center; padding: 20px 0; }
+  .payment-success-icon { font-size: 56px; margin-bottom: 16px; }
+  .payment-success-title { font-family: var(--font-display); font-size: 24px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+  .payment-success-sub { font-size: 13px; color: var(--text-muted); line-height: 1.7; font-weight: 300; }
+  .inbox-layout { display: grid; grid-template-columns: 300px 1fr; gap: 0; height: calc(100vh - 64px); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .inbox-sidebar { background: var(--bg2); border-right: 0.5px solid var(--border); overflow-y: auto; }
+  .inbox-sidebar-header { padding: 20px; border-bottom: 0.5px solid var(--border); font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--text); }
+  .convo-item { padding: 16px 20px; border-bottom: 0.5px solid var(--border); cursor: pointer; transition: background 0.15s; display: flex; gap: 12px; align-items: flex-start; }
+  .convo-item:hover { background: var(--bg3); }
+  .convo-item.active { background: var(--bg3); border-left: 2px solid var(--accent); }
+  .convo-avatar { width: 38px; height: 38px; border-radius: 50%; background: rgba(240,165,0,0.15); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 13px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
+  .convo-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+  .convo-preview { font-size: 12px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+  .convo-time { font-size: 11px; color: var(--text-dim); margin-left: auto; white-space: nowrap; }
+  .unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-top: 4px; flex-shrink: 0; }
+  .chat-area { display: flex; flex-direction: column; background: var(--bg); }
+  .chat-header { padding: 16px 24px; border-bottom: 0.5px solid var(--border); display: flex; align-items: center; gap: 12px; background: var(--bg2); }
+  .chat-header-name { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--text); }
+  .chat-header-sub { font-size: 12px; color: var(--text-muted); }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+  .chat-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-dim); font-size: 14px; gap: 8px; }
+  .chat-empty-icon { font-size: 40px; }
+  .msg-row { display: flex; gap: 10px; align-items: flex-end; }
+  .msg-row.mine { flex-direction: row-reverse; }
+  .msg-bubble { max-width: 65%; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.6; }
+  .msg-bubble.theirs { background: var(--bg3); color: var(--text); border-bottom-left-radius: 4px; }
+  .msg-bubble.mine { background: var(--accent); color: #0d0d0d; border-bottom-right-radius: 4px; font-weight: 500; }
+  .msg-time { font-size: 10px; color: var(--text-dim); margin-bottom: 2px; }
+  .msg-av { width: 28px; height: 28px; border-radius: 50%; background: var(--bg3); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--text-muted); flex-shrink: 0; }
+  .chat-input-area { padding: 16px 24px; border-top: 0.5px solid var(--border); display: flex; gap: 10px; align-items: flex-end; background: var(--bg2); }
+  .chat-input { flex: 1; background: var(--bg3); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-family: var(--font-body); font-size: 14px; color: var(--text); outline: none; resize: none; line-height: 1.5; min-height: 42px; max-height: 120px; transition: border-color 0.2s; }
+  .chat-input:focus { border-color: var(--accent); }
+  .chat-input::placeholder { color: var(--text-dim); }
+  .chat-send-btn { background: var(--accent); color: #0d0d0d; border: none; border-radius: var(--radius-sm); padding: 10px 18px; font-family: var(--font-display); font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
+  .chat-send-btn:hover { background: #ffb520; }
+  .inbox-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-dim); font-size: 14px; gap: 8px; padding: 40px; text-align: center; }
+  .no-convo-selected { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-dim); gap: 10px; }
+  .no-convo-selected-icon { font-size: 40px; }
+
+  @media (max-width: 720px) {
+    nav { padding: 0 20px; }
+    nav .nav-links { display: none; }
+    #hero-section { padding: 100px 20px 60px; }
+    .section { padding: 60px 20px; }
+    .form-row { grid-template-columns: 1fr; }
+    .profile-layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+    .cta-band { margin: 0 20px 60px; padding: 36px 28px; }
+    footer { padding: 32px 20px; }
+    .dash-header { padding: 80px 20px 32px; }
+    .inbox-layout { grid-template-columns: 1fr; height: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo" onclick="showPage('home')">Creator<span>Bridge</span></div>
+  <ul class="nav-links">
+    <li><a href="#" onclick="showPage('home')">Home</a></li>
+    <li><a href="#" onclick="showPage('browse')">Browse talent</a></li>
+    <li><a href="#" onclick="showPage('post')">Post a project</a></li>
+    <li><a href="#" onclick="showPage('how')">How it works</a></li>
+    <li id="nav-dashboard-link" style="display:none"><a href="#" onclick="showPage('dashboard')" style="color:var(--accent)">Dashboard</a></li>
+    <li id="nav-setup-link" style="display:none"><a href="#" onclick="showPage('setup')" style="color:var(--accent)">My Profile</a></li>
+    <li id="nav-messages-link" style="display:none"><a href="#" onclick="showPage('messages')" style="color:var(--accent)" id="nav-messages-label">Messages</a></li>
+    <li id="nav-projects-link" style="display:none"><a href="#" onclick="showPage('projects')" style="color:var(--accent)">Find work</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="btn-ghost" id="nav-login-btn">Log in</button>
+    <button class="btn-primary" id="nav-signup-btn">Get started</button>
+  </div>
+</nav>
+
+<!-- HOME PAGE -->
+<div id="page-home" class="page active">
+  <section id="hero-section">
+    <div class="hero-glow"></div>
+    <div class="hero-eyebrow fade-up">Built for the creator economy</div>
+    <h1 class="hero-title fade-up delay-1">Your content.<br><em>Their craft.</em><br>One place.</h1>
+    <p class="hero-sub fade-up delay-2">Connect with vetted video editors, videographers, thumbnail artists and more — built around how creators actually work.</p>
+    <div class="hero-search fade-up delay-3">
+      <input type="text" placeholder="Video editor for YouTube tech channel…" id="hero-input"/>
+      <button onclick="doSearch()">Search</button>
+    </div>
+    <div class="hero-tags fade-up delay-4">
+      <span class="hero-tag" onclick="searchTag('Video editor')">Video editor</span>
+      <span class="hero-tag" onclick="searchTag('Thumbnail artist')">Thumbnail artist</span>
+      <span class="hero-tag" onclick="searchTag('Motion graphics')">Motion graphics</span>
+      <span class="hero-tag" onclick="searchTag('Videographer')">Videographer</span>
+      <span class="hero-tag" onclick="searchTag('Scriptwriter')">Scriptwriter</span>
+      <span class="hero-tag" onclick="searchTag('Sound design')">Sound design</span>
+    </div>
+    <div class="hero-stats fade-up delay-4">
+      <div><div class="hero-stat-num">4,200<span>+</span></div><div class="hero-stat-label">Verified freelancers</div></div>
+      <div><div class="hero-stat-num">18<span>k+</span></div><div class="hero-stat-label">Projects done</div></div>
+      <div><div class="hero-stat-num">4.9<span>★</span></div><div class="hero-stat-label">Avg. rating</div></div>
+      <div><div class="hero-stat-num">24<span>hr</span></div><div class="hero-stat-label">Avg. first response</div></div>
+    </div>
+  </section>
+
+  <div class="ticker-wrap">
+    <div class="ticker">
+      <span class="ticker-item">Video editing</span><span class="ticker-item">Thumbnail design</span><span class="ticker-item">Motion graphics</span><span class="ticker-item">Scriptwriting</span><span class="ticker-item">Sound design</span><span class="ticker-item">Color grading</span><span class="ticker-item">Videography</span><span class="ticker-item">Podcast editing</span><span class="ticker-item">Subtitles & captions</span><span class="ticker-item">Brand kits</span>
+      <span class="ticker-item">Video editing</span><span class="ticker-item">Thumbnail design</span><span class="ticker-item">Motion graphics</span><span class="ticker-item">Scriptwriting</span><span class="ticker-item">Sound design</span><span class="ticker-item">Color grading</span><span class="ticker-item">Videography</span><span class="ticker-item">Podcast editing</span><span class="ticker-item">Subtitles & captions</span><span class="ticker-item">Brand kits</span>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="section-head">
+      <div><div class="section-label">Top rated this week</div><div class="section-title">Talent ready to work</div></div>
+      <button class="btn-ghost" onclick="showPage('browse')">Browse all →</button>
+    </div>
+    <div class="filter-bar" id="home-filters">
+      <button class="filter-pill active" onclick="filterHome(this,'all')">All</button>
+      <button class="filter-pill" onclick="filterHome(this,'editor')">Editors</button>
+      <button class="filter-pill" onclick="filterHome(this,'videographer')">Videographers</button>
+      <button class="filter-pill" onclick="filterHome(this,'motion')">Motion</button>
+      <button class="filter-pill" onclick="filterHome(this,'thumbnail')">Thumbnails</button>
+      <button class="filter-pill" onclick="filterHome(this,'writer')">Writers</button>
+    </div>
+    <div class="freelancer-grid" id="home-grid"></div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="section-label">Simple process</div>
+    <div class="section-title">How it works</div>
+    <div class="how-grid">
+      <div class="how-card"><div class="how-num">01</div><div class="how-title">Post your project</div><div class="how-desc">Describe your content niche, platform, style, and budget. Takes under 3 minutes.</div></div>
+      <div class="how-card"><div class="how-num">02</div><div class="how-title">Get proposals</div><div class="how-desc">Vetted freelancers who match your needs send proposals within 24 hours.</div></div>
+      <div class="how-card"><div class="how-num">03</div><div class="how-title">Review & hire</div><div class="how-desc">Browse portfolios, check reviews, chat, and hire directly. Payment held securely.</div></div>
+      <div class="how-card"><div class="how-num">04</div><div class="how-title">Collaborate & grow</div><div class="how-desc">Work together on your schedule. Many creators end up with long-term retainers.</div></div>
+    </div>
+  </section>
+
+  <div class="cta-band">
+    <div><div class="cta-title">Ready to level up your content?</div><div class="cta-sub">Post your first project free — no subscription needed.</div></div>
+    <button class="btn-primary" style="padding: 14px 32px; font-size: 15px;" onclick="showPage('post')">Post a project</button>
+  </div>
+
+  <footer>
+    <div class="footer-logo">Creator<span>Bridge</span></div>
+    <div class="footer-links"><a href="#">About</a><a href="#">Blog</a><a href="#">For freelancers</a><a href="#">Careers</a><a href="#">Privacy</a></div>
+    <div class="footer-copy">© 2025 CreatorBridge</div>
+  </footer>
+</div>
+
+<!-- BROWSE PAGE -->
+<div id="page-browse" class="page">
+  <section class="section" style="padding-top: 88px;">
+    <div class="section-label">Discover</div>
+    <div class="section-title">Find your team</div>
+    <div class="profile-layout">
+      <aside class="sidebar">
+        <div class="sidebar-group">
+          <div class="sidebar-title">Role</div>
+          <label class="sidebar-check"><input type="checkbox" checked><label>Video editor</label></label>
+          <label class="sidebar-check"><input type="checkbox"><label>Videographer</label></label>
+          <label class="sidebar-check"><input type="checkbox"><label>Motion designer</label></label>
+          <label class="sidebar-check"><input type="checkbox"><label>Thumbnail artist</label></label>
+          <label class="sidebar-check"><input type="checkbox"><label>Scriptwriter</label></label>
+          <label class="sidebar-check"><input type="checkbox"><label>Sound designer</label></label>
+          <label class="sidebar-check"><input type="checkbox"><label>Colorist</label></label>
+        </div>
+        <div class="sidebar-group">
+          <div class="sidebar-title">Platform</div>
+          <label class="sidebar-check"><input type="checkbox" checked><label>YouTube long-form</label></label>
+          <label class="sidebar-check"><input type="checkbox"><label>Reels / TikTok / Shorts</label></label>
+          <label class="sidebar-check"><input type="checkbox"><label>Podcast</label></label>
+          <label class="sidebar-check"><input type="checkbox"><label>Brand / corporate</label></label>
+        </div>
+        <div class="sidebar-group">
+          <div class="sidebar-title">Budget per video</div>
+          <div class="range-label"><span>₹500</span><span id="range-val">₹10,000</span></div>
+          <input type="range" min="500" max="25000" value="10000" step="500" oninput="document.getElementById('range-val').textContent='₹'+Number(this.value).toLocaleString()">
+        </div>
+        <div class="sidebar-group">
+          <div class="sidebar-title">Availability</div>
+          <label class="sidebar-check"><input type="checkbox" checked><label>Available now</label></label>
+          <label class="sidebar-check"><input type="checkbox"><label>Open to retainer</label></label>
+        </div>
+        <button class="btn-primary" style="width:100%; margin-top:4px" onclick="showToast('Filters applied!')">Apply filters</button>
+      </aside>
+      <div>
+        <div class="filter-bar">
+          <button class="filter-pill active" onclick="filterBrowse(this,'all')">All</button>
+          <button class="filter-pill" onclick="filterBrowse(this,'editor')">Editors</button>
+          <button class="filter-pill" onclick="filterBrowse(this,'videographer')">Videographers</button>
+          <button class="filter-pill" onclick="filterBrowse(this,'motion')">Motion</button>
+          <button class="filter-pill" onclick="filterBrowse(this,'thumbnail')">Thumbnails</button>
+          <button class="filter-pill" onclick="filterBrowse(this,'writer')">Writers</button>
+        </div>
+        <div class="freelancer-grid" id="browse-grid"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- POST PROJECT PAGE -->
+<div id="page-post" class="page">
+  <section class="section" style="padding-top: 100px; max-width: 800px; margin: 0 auto;">
+    <div class="section-label">Get started</div>
+    <div class="section-title" style="margin-bottom: 8px;">Post a project</div>
+    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 40px; font-weight: 300;">Tell us what you need. We'll match you with the right people.</p>
+    <div class="post-form-wrap">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Your name</label><input class="form-input" type="text" id="project-name" placeholder="Rahul Sharma"></div>
+        <div class="form-group"><label class="form-label">Your channel / brand</label><input class="form-input" type="text" id="project-channel" placeholder="Tech With Rahul"></div>
+      </div>
+      <div class="form-group"><label class="form-label">What do you need?</label>
+        <select class="form-select" id="project-role">
+          <option value="">Select a role...</option>
+          <option>Video editor</option><option>Videographer</option><option>Thumbnail artist</option>
+          <option>Motion graphics designer</option><option>Scriptwriter</option>
+          <option>Sound designer / mixer</option><option>Colorist</option><option>Subtitles / captions</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Platform</label>
+          <select class="form-select" id="project-platform">
+            <option>YouTube long-form</option><option>Instagram Reels</option>
+            <option>YouTube Shorts / TikTok</option><option>Podcast</option><option>Brand / corporate</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Budget per video</label>
+          <select class="form-select" id="project-budget">
+            <option>Under ₹2,000</option><option>₹2,000 – ₹5,000</option>
+            <option>₹5,000 – ₹10,000</option><option>₹10,000 – ₹25,000</option><option>₹25,000+</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Project description</label>
+        <textarea class="form-textarea" id="project-desc" placeholder="Describe your content style, what you're looking for, turnaround time, any reference channels you like…"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Frequency</label>
+          <select class="form-select" id="project-frequency">
+            <option>One-off project</option><option>1–2 videos per week</option>
+            <option>3–5 videos per week</option><option>Daily content</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Timeline needed</label>
+          <select class="form-select" id="project-timeline">
+            <option>Within 24 hours</option><option>2–3 days</option>
+            <option>Within a week</option><option>Flexible</option>
+          </select>
+        </div>
+      </div>
+      <button class="form-submit" id="post-submit-btn" onclick="submitProject()">Post my project — it's free</button>
+      <p class="form-note">No credit card required. Get proposals within 24 hours.</p>
+    </div>
+  </section>
+</div>
+
+<!-- HOW IT WORKS PAGE -->
+<div id="page-how" class="page">
+  <section class="section" style="padding-top: 100px; max-width: 800px; margin: 0 auto;">
+    <div class="section-label">The process</div>
+    <div class="section-title">How CreatorBridge works</div>
+    <div style="border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden;">
+      <div class="how-card" style="border-bottom: 0.5px solid var(--border);"><div class="how-num">01</div><div class="how-title">Post your project for free</div><div class="how-desc">Describe your content niche, platform, style reference, and budget. Always free for creators.</div></div>
+      <div class="how-card" style="border-bottom: 0.5px solid var(--border);"><div class="how-num">02</div><div class="how-title">Receive curated proposals</div><div class="how-desc">Only verified freelancers who match your brief are notified. Proposals within 24 hours.</div></div>
+      <div class="how-card" style="border-bottom: 0.5px solid var(--border);"><div class="how-num">03</div><div class="how-title">Chat, review, and hire</div><div class="how-desc">View portfolios, compare proposals. Pay securely — funds released only when you approve.</div></div>
+      <div class="how-card" style="border-bottom: 0.5px solid var(--border);"><div class="how-num">04</div><div class="how-title">Collaborate on your schedule</div><div class="how-desc">Share files, leave feedback, communicate in one thread. No more scattered WhatsApp chains.</div></div>
+      <div class="how-card"><div class="how-num">05</div><div class="how-title">Build your long-term team</div><div class="how-desc">Great match? Set up a retainer for weekly or monthly work.</div></div>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 40px;">
+      <div style="background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 28px;">
+        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 12px; font-weight: 500;">For creators</div>
+        <div style="font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px;">Post free, always.</div>
+        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.65; font-weight: 300;">Small platform fee only on successful completion. No upfront costs.</div>
+        <button class="btn-primary" style="margin-top: 20px; padding: 10px 24px;" onclick="showPage('post')">Post a project</button>
+      </div>
+      <div style="background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 28px;">
+        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 12px; font-weight: 500;">For freelancers</div>
+        <div style="font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px;">Get discovered.</div>
+        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.65; font-weight: 300;">Build your profile, showcase your portfolio, get matched with creators.</div>
+        <button class="btn-ghost" style="margin-top: 20px; padding: 10px 24px;" onclick="openAuth('signup')">Join as freelancer</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- FREELANCER PROFILE VIEW PAGE -->
+<div id="page-profile" class="page">
+  <div class="profile-hero">
+    <div class="profile-inner">
+      <div class="profile-avatar-lg av-1" id="profile-avatar-lg">AK</div>
+      <div class="profile-info">
+        <div class="profile-name" id="profile-name">Arjun K.</div>
+        <div class="profile-tagline" id="profile-tagline">Video editor · YouTube long-form</div>
+        <div class="profile-badges" id="profile-badges"><span class="fcard-badge badge-yt">YouTube</span></div>
+        <div class="profile-stats">
+          <div><div class="profile-stat-n" id="profile-rate">₹3,500/video</div><div class="profile-stat-l">Rate</div></div>
+          <div><div class="profile-stat-n" id="profile-rating">4.9 ★</div><div class="profile-stat-l">Rating</div></div>
+          <div><div class="profile-stat-n">82</div><div class="profile-stat-l">Reviews</div></div>
+        </div>
+        <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+          <button class="btn-primary" onclick="showPage('post')">Hire for a project</button>
+          <button class="btn-ghost" onclick="showToast('Messaging coming soon!')">Send message</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <section class="section" style="max-width: 900px; margin: 0 auto;">
+    <div style="display: grid; grid-template-columns: 1fr 280px; gap: 32px; align-items: start; flex-wrap: wrap;">
+      <div>
+        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 10px; font-weight: 500;">About</div>
+        <p id="profile-about" style="font-size: 14px; color: var(--text-muted); line-height: 1.8; font-weight: 300; margin-bottom: 32px;"></p>
+        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 12px; font-weight: 500;">Portfolio samples</div>
+        <div class="portfolio-grid">
+          <div class="portfolio-item" onclick="showToast('Preview coming soon!')"><div style="text-align:center"><div class="play-icon">▶</div><div class="portfolio-item-label">Sample 1</div></div></div>
+          <div class="portfolio-item" onclick="showToast('Preview coming soon!')"><div style="text-align:center"><div class="play-icon">▶</div><div class="portfolio-item-label">Sample 2</div></div></div>
+          <div class="portfolio-item" onclick="showToast('Preview coming soon!')"><div style="text-align:center"><div class="play-icon">▶</div><div class="portfolio-item-label">Sample 3</div></div></div>
+        </div>
+        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin: 32px 0 12px; font-weight: 500;">Client reviews</div>
+        <div class="review-card">
+          <div class="review-top"><div class="reviewer-av">TR</div><div><div class="reviewer-name">TechRaj</div><div class="reviewer-date">2 weeks ago</div></div><div style="margin-left: auto; color: var(--accent); font-size: 13px;">★★★★★</div></div>
+          <div class="review-text">Absolutely nailed the edit. Delivered a day early. Will be using again every week.</div>
+        </div>
+      </div>
+      <div style="position: sticky; top: 88px;">
+        <div style="background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 24px;">
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 16px; font-weight: 500;">Quick info</div>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px;"><span style="color: var(--text-muted);">Response time</span><span style="font-weight: 500;">Under 2 hours</span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 13px;"><span style="color: var(--text-muted);">Delivery</span><span style="font-weight: 500;">2–3 days</span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 13px;"><span style="color: var(--text-muted);">Revisions</span><span style="font-weight: 500;">3 included</span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 13px;"><span style="color: var(--text-muted);">Open to retainer</span><span style="color: #4ade80; font-weight: 500;">Yes ✓</span></div>
+          </div>
+          <button class="btn-primary" style="width:100%; margin-top:20px; padding:12px;" onclick="showPage('post')">Hire for a project</button>
+          <button class="btn-ghost" style="width:100%; margin-top:8px; padding:12px;" onclick="showToast('Messaging coming soon!')">Message</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- CREATOR DASHBOARD PAGE -->
+<div id="page-dashboard" class="page">
+  <div class="dash-header">
+    <div class="section-label">My workspace</div>
+    <div class="dash-title" id="dash-greeting">Your Dashboard</div>
+    <div class="dash-sub">All your posted projects in one place.</div>
+    <div class="dash-stats">
+      <div class="dash-stat"><div class="dash-stat-n" id="dash-total">0</div><div class="dash-stat-l">Projects posted</div></div>
+      <div class="dash-stat"><div class="dash-stat-n" id="dash-open"><span>0</span></div><div class="dash-stat-l">Open</div></div>
+      <div class="dash-stat"><div class="dash-stat-n" id="dash-proposals">0</div><div class="dash-stat-l">Proposals received</div></div>
+    </div>
+  </div>
+  <section class="section">
+    <div class="section-head">
+      <div><div class="section-label">Your projects</div></div>
+      <button class="btn-primary" onclick="showPage('post')">+ Post new project</button>
+    </div>
+    <div id="dash-projects-wrap"><div class="dash-loading">Loading your projects…</div></div>
+  </section>
+</div>
+
+<!-- FREELANCER SETUP PAGE -->
+<div id="page-setup" class="page">
+  <section class="section" style="padding-top: 100px; max-width: 800px; margin: 0 auto;">
+    <div class="section-label">Freelancer profile</div>
+    <div class="section-title" style="margin-bottom: 8px;">Set up your profile</div>
+    <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 32px; font-weight: 300;">This is what creators see when they find you. Make it count.</p>
+    <div class="setup-banner">✦ Your profile will appear on the Browse page once saved. Creators can find and hire you directly.</div>
+    <div class="setup-wrap">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Display name</label><input class="form-input" type="text" id="setup-name" placeholder="Arjun K."></div>
+        <div class="form-group"><label class="form-label">Your role</label>
+          <select class="form-select" id="setup-role">
+            <option value="">Select your role...</option>
+            <option>Video editor</option><option>Videographer</option><option>Thumbnail artist</option>
+            <option>Motion graphics designer</option><option>Scriptwriter</option>
+            <option>Sound designer / mixer</option><option>Colorist</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Primary platform</label>
+          <select class="form-select" id="setup-platform">
+            <option>YouTube long-form</option><option>Instagram Reels</option>
+            <option>YouTube Shorts / TikTok</option><option>Podcast</option><option>Brand / corporate</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Rate</label><input class="form-input" type="text" id="setup-rate" placeholder="e.g. ₹3,500/video or ₹8,000/day"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Bio</label>
+        <textarea class="form-textarea" id="setup-bio" placeholder="Tell creators about your experience, style, the kind of content you love working on, and what makes your work stand out…"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Skills</label>
+        <div class="skills-grid" id="skills-grid">
+          <span class="skill-chip" onclick="toggleSkill(this)">Premiere Pro</span>
+          <span class="skill-chip" onclick="toggleSkill(this)">DaVinci Resolve</span>
+          <span class="skill-chip" onclick="toggleSkill(this)">After Effects</span>
+          <span class="skill-chip" onclick="toggleSkill(this)">Final Cut Pro</span>
+          <span class="skill-chip" onclick="toggleSkill(this)">Photoshop</span>
+          <span class="skill-chip" onclick="toggleSkill(this)">Illustrator</span>
+          <span class="skill-chip" onclick="toggleSkill(this)">Figma</span>
+          <span class="skill-chip" onclick="toggleSkill(this)">Color grading</span>
+          <span class="skill-chip" onclick="toggleSkill(this)">Motion graphics</span>
+          <span class="skill-chip" onclick="toggleSkill(this)">Sound design</span>
+          <span class="skill-chip" onclick="toggleSkill(this)">Podcast editing</span>
+          <span class="skill-chip" onclick="toggleSkill(this)">Subtitles / captions</span>
+          <span class="skill-chip" onclick="toggleSkill(this)">Scriptwriting</span>
+          <span class="skill-chip" onclick="toggleSkill(this)">Thumbnail design</span>
+          <span class="skill-chip" onclick="toggleSkill(this)">Voiceover</span>
+          <span class="skill-chip" onclick="toggleSkill(this)">Drone footage</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Availability</label>
+          <select class="form-select" id="setup-available">
+            <option value="true">Available now</option>
+            <option value="false">Not available</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Location</label>
+          <input class="form-input" type="text" id="setup-location" placeholder="Mumbai, India">
+        </div>
+      </div>
+      <button class="form-submit" id="setup-submit-btn" onclick="saveFreelancerProfile()">Save my profile</button>
+      <p class="form-note">You can update this anytime from the nav.</p>
+    </div>
+  </section>
+</div>
+
+<!-- PROJECTS BOARD PAGE (for freelancers) -->
+<div id="page-projects" class="page">
+  <section class="section" style="padding-top: 88px;">
+    <div class="section-label">Open projects</div>
+    <div class="section-title">Find work</div>
+    <p style="color:var(--text-muted); font-size:14px; margin-bottom:32px; font-weight:300;">Browse projects posted by creators. Send a proposal directly from here.</p>
+    <div id="projects-board-wrap"><div class="dash-loading">Loading projects…</div></div>
+  </section>
+</div>
+
+<!-- PROPOSAL MODAL -->
+<div class="modal-overlay" id="proposal-modal">
+  <div class="modal" style="max-width:500px;">
+    <button class="modal-close" onclick="closeProposal()">✕</button>
+    <div class="modal-logo" style="margin-bottom:4px;">Send a proposal</div>
+    <div id="proposal-project-title" style="font-size:13px; color:var(--text-muted); margin-bottom:24px; font-weight:300;"></div>
+    <div style="display:flex; flex-direction:column; gap:14px;">
+      <div>
+        <label class="form-label">Your rate for this project</label>
+        <input class="modal-input" type="text" id="proposal-rate" placeholder="e.g. ₹3,500/video or ₹500/reel">
+      </div>
+      <div>
+        <label class="form-label">Your message</label>
+        <textarea class="modal-input" id="proposal-message" rows="5" placeholder="Introduce yourself, explain why you're a great fit, share relevant experience or portfolio links…" style="resize:vertical; line-height:1.6;"></textarea>
+      </div>
+      <div class="modal-error" id="proposal-error"></div>
+      <div class="modal-success" id="proposal-success"></div>
+      <button class="modal-btn" id="proposal-submit-btn" onclick="submitProposal()">Send proposal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGES PAGE -->
+<div id="page-messages" class="page">
+  <div style="padding-top: 64px; height: 100vh; display: flex; flex-direction: column; overflow: hidden;">
+    <div style="padding: 16px 40px; border-bottom: 0.5px solid var(--border); background: var(--bg2); flex-shrink:0;">
+      <div class="section-label">Inbox</div>
+      <div style="font-family: var(--font-display); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: var(--text);">Messages</div>
+    </div>
+    <div style="display:grid; grid-template-columns:300px 1fr; flex:1; overflow:hidden; margin: 16px 40px; border: 0.5px solid var(--border); border-radius: var(--radius);">
+      <div style="background:var(--bg2); border-right:0.5px solid var(--border); overflow-y:auto;">
+        <div class="inbox-sidebar-header">Conversations</div>
+        <div id="conversations-list"><div style="padding:24px; color:var(--text-dim); font-size:13px;">Loading…</div></div>
+      </div>
+      <div class="chat-area" id="chat-area" style="display:flex; flex-direction:column; overflow:hidden;">
+        <div class="no-convo-selected">
+          <div class="no-convo-selected-icon">💬</div>
+          <div style="font-size:14px; color:var(--text-muted);">Select a conversation to start chatting</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-overlay" id="payment-modal">
+  <div class="modal" style="max-width:460px;">
+    <button class="modal-close" onclick="closePayment()">✕</button>
+    <div class="modal-logo" style="margin-bottom:20px;">Creator<span>Bridge</span> Pay</div>
+
+    <!-- Step indicators -->
+    <div class="payment-steps">
+      <div class="payment-step active" id="pay-step-1">1. Review</div>
+      <div class="payment-step" id="pay-step-2">2. Pay</div>
+      <div class="payment-step" id="pay-step-3">3. Done</div>
+    </div>
+
+    <!-- Step 1: Review -->
+    <div id="pay-screen-1">
+      <div style="font-size:13px; color:var(--text-muted); margin-bottom:16px; font-weight:300;">You're hiring <strong id="pay-freelancer-name" style="color:var(--text)"></strong> for:</div>
+      <div class="payment-summary" id="pay-summary"></div>
+      <div class="form-group">
+        <label class="form-label">Amount to pay (₹)</label>
+        <input class="modal-input" type="number" id="pay-amount-input" placeholder="e.g. 3500" min="100"/>
+      </div>
+      <div style="font-size:12px; color:var(--text-dim); margin-bottom:16px;">Platform fee (5%): <span id="pay-platform-fee">₹0</span> — Total: <span id="pay-total-amount">₹0</span></div>
+      <button class="modal-btn" onclick="goToPayStep2()">Continue to payment →</button>
+    </div>
+
+    <!-- Step 2: Payment method -->
+    <div id="pay-screen-2" style="display:none;">
+      <div class="payment-amount-display">₹<span id="pay-final-amount">0</span></div>
+      <div style="font-size:12px; color:var(--text-dim); text-align:center; margin-bottom:20px;">Select payment method</div>
+      <div class="payment-methods">
+        <div class="payment-method selected" id="pm-upi" onclick="selectPayMethod('upi')"><div class="payment-method-icon">📱</div>UPI</div>
+        <div class="payment-method" id="pm-card" onclick="selectPayMethod('card')"><div class="payment-method-icon">💳</div>Card</div>
+        <div class="payment-method" id="pm-netbanking" onclick="selectPayMethod('netbanking')"><div class="payment-method-icon">🏦</div>Net Banking</div>
+        <div class="payment-method" id="pm-wallet" onclick="selectPayMethod('wallet')"><div class="payment-method-icon">👛</div>Wallet</div>
+      </div>
+      <div id="pay-method-detail" style="background:var(--bg3); border-radius:var(--radius-sm); padding:16px; margin-bottom:16px; font-size:13px; color:var(--text-muted);">
+        Enter your UPI ID below to complete payment.
+        <input class="modal-input" type="text" id="pay-upi-input" placeholder="yourname@upi" style="margin-top:10px;"/>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-ghost" style="flex:1" onclick="goToPayStep1()">← Back</button>
+        <button class="modal-btn" style="flex:2" id="pay-confirm-btn" onclick="confirmPayment()">Pay now</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Success -->
+    <div id="pay-screen-3" style="display:none;">
+      <div class="payment-success">
+        <div class="payment-success-icon">🎉</div>
+        <div class="payment-success-title">Payment successful!</div>
+        <div class="payment-success-sub">Your payment has been recorded.<br><strong id="pay-success-name" style="color:var(--text)"></strong> has been notified and your project is now in progress.</div>
+        <div style="background:rgba(74,222,128,0.08); border:0.5px solid rgba(74,222,128,0.2); border-radius:var(--radius-sm); padding:14px; margin:20px 0; font-size:13px; color:#4ade80;">✓ Payment ID: <span id="pay-success-id" style="font-weight:500;"></span></div>
+        <button class="btn-primary" style="width:100%; padding:12px;" onclick="closePayment(); showPage('dashboard')">View dashboard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROPOSAL VIEWER MODAL -->
+<div class="modal-overlay" id="proposal-viewer-modal">
+  <div class="modal" style="max-width:560px; max-height:80vh; overflow-y:auto;">
+    <button class="modal-close" onclick="closeProposalModal()">✕</button>
+    <div class="modal-logo" style="margin-bottom:4px;">Proposals</div>
+    <div id="proposal-modal-title" style="font-size:13px; color:var(--text-muted); margin-bottom:24px; font-weight:300;"></div>
+    <div id="proposal-modal-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span>✓</span><span id="toast-msg">Done!</span></div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAuth()">✕</button>
+    <div class="modal-logo">Creator<span>Bridge</span></div>
+    <div class="modal-subtitle" id="modal-subtitle">Welcome back</div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tab-login" onclick="switchTab('login')">Log in</button>
+      <button class="modal-tab" id="tab-signup" onclick="switchTab('signup')">Sign up</button>
+    </div>
+    <div class="modal-form">
+      <div id="signup-fields" style="display:none; flex-direction:column; gap:14px;">
+        <input class="modal-input" type="text" id="auth-name" placeholder="Your name" />
+        <div>
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:8px;">I am a...</div>
+          <div class="type-toggle">
+            <button class="type-btn selected" id="type-creator" onclick="selectType('creator')">🎬 Creator</button>
+            <button class="type-btn" id="type-freelancer" onclick="selectType('freelancer')">✂️ Freelancer</button>
+          </div>
+        </div>
+      </div>
+      <input class="modal-input" type="email" id="auth-email" placeholder="Email address" />
+      <input class="modal-input" type="password" id="auth-password" placeholder="Password" />
+      <div class="modal-error" id="auth-error"></div>
+      <div class="modal-success" id="auth-success"></div>
+      <button class="modal-btn" id="auth-submit" onclick="submitAuth()">Log in</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { supabase } from './supabase.js'
+  import { signUp, logIn, logOut, getUser } from './auth.js'
+
+  window.supabase = supabase
+
+  // ── STATIC FALLBACK FREELANCERS ──
+  const STATIC_FREELANCERS = [
+    { id:'s1', initials:'AK', av:'av-1', name:'Arjun K.', role:'Video editor', badge:'YouTube long-form', badgeClass:'badge-yt', desc:'Story-driven edits for long-form YouTube. Has worked with channels above 500K subs.', rate:'₹3,500/video', stars:'4.9 (82)', tag:'editor', about:'Arjun is a Mumbai-based video editor with 3 years of experience in long-form YouTube content.' },
+    { id:'s2', initials:'SR', av:'av-5', name:'Sneha R.', role:'Thumbnail artist', badge:'Instagram / Reels', badgeClass:'badge-ig', desc:'Bold, high-CTR thumbnails. Delivers in 24 hrs. 3 revisions included.', rate:'₹800/thumbnail', stars:'5.0 (114)', tag:'thumbnail', about:'Sneha is a graphic designer turned thumbnail specialist.' },
+    { id:'s3', initials:'MV', av:'av-4', name:'Mihir V.', role:'Videographer', badge:'Shorts / TikTok', badgeClass:'badge-short', desc:'On-location shoots in Mumbai & Pune. Sony FX3. Available for day rates or retainers.', rate:'₹8,000/day', stars:'4.8 (47)', tag:'videographer', about:'Mihir is a freelance cinematographer based in Mumbai.' },
+    { id:'s4', initials:'PT', av:'av-3', name:'Priya T.', role:'Motion designer', badge:'YouTube long-form', badgeClass:'badge-yt', desc:'After Effects, intros, lower thirds, animated explainers, and channel branding kits.', rate:'₹2,200/asset', stars:'4.9 (61)', tag:'motion', about:'Priya is a motion graphics designer with 4 years experience.' },
+    { id:'s5', initials:'RN', av:'av-2', name:'Ravi N.', role:'Scriptwriter', badge:'Podcast', badgeClass:'badge-pod', desc:'Long-form scripts, show notes & SEO titles for podcasters and educators.', rate:'₹1,500/episode', stars:'4.8 (39)', tag:'writer', about:'Ravi writes for creators in finance, self-improvement, and business niches.' },
+    { id:'s6', initials:'LD', av:'av-6', name:'Leila D.', role:'Sound designer', badge:'Podcast', badgeClass:'badge-pod', desc:'Mixing, mastering, noise removal. 48-hour turnaround guaranteed.', rate:'₹1,200/episode', stars:'4.9 (73)', tag:'writer', about:'Leila has mixed and mastered over 800 podcast episodes.' },
+  ]
+
+  const AV_COLORS = ['av-1','av-2','av-3','av-4','av-5','av-6']
+  const ROLE_TAGS = { 'Video editor':'editor', 'Videographer':'videographer', 'Motion graphics designer':'motion', 'Thumbnail artist':'thumbnail', 'Scriptwriter':'writer', 'Sound designer / mixer':'writer', 'Colorist':'editor' }
+  const PLATFORM_BADGES = { 'YouTube long-form':'badge-yt', 'Instagram Reels':'badge-ig', 'YouTube Shorts / TikTok':'badge-short', 'Podcast':'badge-pod', 'Brand / corporate':'badge-brand' }
+
+  let currentTab = 'login'
+  let selectedType = 'creator'
+  let currentUser = null
+  let currentUserType = null
+
+  // ── INIT ──
+  document.addEventListener('DOMContentLoaded', async () => {
+    document.getElementById('nav-login-btn').onclick = () => openAuth('login')
+    document.getElementById('nav-signup-btn').onclick = () => openAuth('signup')
+    document.getElementById('auth-modal').addEventListener('click', e => { if (e.target.id === 'auth-modal') closeAuth() })
+    renderGrid('home-grid', STATIC_FREELANCERS)
+    const user = await getUser()
+    if (user) {
+      currentUser = user
+      currentUserType = await loadUserType(user)
+      updateNavForUser(user)
+    }
+  })
+
+  async function loadUserType(user) {
+    const { data } = await supabase.from('profiles').select('type').eq('id', user.id).single()
+    if (data) currentUserType = data.type
+    return data?.type
+  }
+
+  function updateNavForUser(user) {
+    const actions = document.querySelector('.nav-actions')
+    const name = user.email.split('@')[0]
+    const initials = name.slice(0,2).toUpperCase()
+    actions.innerHTML = `
+      <div class="nav-user">
+        <div class="nav-avatar">${initials}</div>
+        <span class="nav-user-name">${name}</span>
+        <button class="btn-ghost" onclick="handleLogout()">Log out</button>
+      </div>`
+    document.getElementById('dash-greeting').textContent = `Welcome back, ${name} 👋`
+    if (currentUserType === 'creator') {
+      document.getElementById('nav-dashboard-link').style.display = 'block'
+    } else if (currentUserType === 'freelancer') {
+      document.getElementById('nav-setup-link').style.display = 'block'
+      document.getElementById('nav-projects-link').style.display = 'block'
+    }
+    document.getElementById('nav-messages-link').style.display = 'block'
+  }
+
+  window.handleLogout = async () => { await logOut(); location.reload() }
+
+  // ── AUTH ──
+  window.openAuth = (tab = 'login') => { switchTab(tab); document.getElementById('auth-modal').classList.add('open') }
+  window.closeAuth = () => {
+    document.getElementById('auth-modal').classList.remove('open')
+    document.getElementById('auth-error').classList.remove('show')
+    document.getElementById('auth-success').classList.remove('show')
+  }
+  window.switchTab = (tab) => {
+    currentTab = tab
+    document.getElementById('tab-login').classList.toggle('active', tab === 'login')
+    document.getElementById('tab-signup').classList.toggle('active', tab === 'signup')
+    document.getElementById('signup-fields').style.display = tab === 'signup' ? 'flex' : 'none'
+    document.getElementById('auth-submit').textContent = tab === 'login' ? 'Log in' : 'Create account'
+    document.getElementById('modal-subtitle').textContent = tab === 'login' ? 'Welcome back' : 'Join CreatorBridge'
+    document.getElementById('auth-error').classList.remove('show')
+    document.getElementById('auth-success').classList.remove('show')
+  }
+  window.selectType = (type) => {
+    selectedType = type
+    document.getElementById('type-creator').classList.toggle('selected', type === 'creator')
+    document.getElementById('type-freelancer').classList.toggle('selected', type === 'freelancer')
+  }
+  window.submitAuth = async () => {
+    const email = document.getElementById('auth-email').value.trim()
+    const password = document.getElementById('auth-password').value
+    const btn = document.getElementById('auth-submit')
+    const errEl = document.getElementById('auth-error')
+    const sucEl = document.getElementById('auth-success')
+    if (!email || !password) { errEl.textContent = 'Please fill in all fields.'; errEl.classList.add('show'); return }
+    btn.disabled = true; btn.textContent = 'Please wait...'
+    errEl.classList.remove('show'); sucEl.classList.remove('show')
+    if (currentTab === 'signup') {
+      const name = document.getElementById('auth-name').value.trim()
+      if (!name) { errEl.textContent = 'Please enter your name.'; errEl.classList.add('show'); btn.disabled = false; btn.textContent = 'Create account'; return }
+      const { error } = await signUp(email, password, name, selectedType)
+      if (error) { errEl.textContent = error.message; errEl.classList.add('show'); btn.disabled = false; btn.textContent = 'Create account' }
+      else { sucEl.textContent = '✓ Account created! Check your email to confirm, then log in.'; sucEl.classList.add('show'); btn.disabled = false; btn.textContent = 'Create account' }
+    } else {
+      const { data, error } = await logIn(email, password)
+      if (error) { errEl.textContent = error.message; errEl.classList.add('show'); btn.disabled = false; btn.textContent = 'Log in' }
+      else {
+        currentUser = data.user
+        currentUserType = await loadUserType(data.user)
+        sucEl.textContent = '✓ Logged in! Welcome back.'
+        sucEl.classList.add('show')
+        setTimeout(() => { closeAuth(); updateNavForUser(data.user) }, 1000)
+      }
+    }
+  }
+
+  // ── PROJECT POSTING ──
+  window.submitProject = async () => {
+    const user = await getUser()
+    if (!user) { showToast('Please log in to post a project'); openAuth('login'); return }
+    const role = document.getElementById('project-role')?.value
+    const desc = document.getElementById('project-desc')?.value.trim()
+    if (!role || !desc) { showToast('Please fill in the role and description'); return }
+    const btn = document.getElementById('post-submit-btn')
+    btn.disabled = true; btn.textContent = 'Posting...'
+    const { error } = await supabase.from('projects').insert({
+      creator_id: user.id,
+      title: `${role} needed for ${document.getElementById('project-channel')?.value.trim() || 'my channel'}`,
+      role_needed: role,
+      platform: document.getElementById('project-platform')?.value,
+      budget: document.getElementById('project-budget')?.value,
+      description: desc,
+      frequency: document.getElementById('project-frequency')?.value,
+      timeline: document.getElementById('project-timeline')?.value,
+      status: 'open'
+    })
+    btn.disabled = false; btn.textContent = "Post my project — it's free"
+    if (error) { showToast('❌ Error: ' + error.message) }
+    else {
+      showToast('🎉 Project posted! Freelancers will reach out shortly.')
+      document.getElementById('project-desc').value = ''
+      document.getElementById('project-channel').value = ''
+      document.getElementById('project-name').value = ''
+    }
+  }
+
+  // ── DASHBOARD ──
+  async function loadDashboard() {
+    const user = await getUser()
+    if (!user) { showPage('home'); openAuth('login'); return }
+    const wrap = document.getElementById('dash-projects-wrap')
+    wrap.innerHTML = '<div class="dash-loading">Loading your projects…</div>'
+    const { data: projects, error } = await supabase.from('projects').select('*').eq('creator_id', user.id).order('created_at', { ascending: false })
+    if (error) { wrap.innerHTML = `<div class="dash-loading">Error: ${error.message}</div>`; return }
+    // fetch proposal counts for all projects
+    const projectIds = projects.map(p => p.id)
+    let proposalCounts = {}
+    if (projectIds.length > 0) {
+      const { data: proposals } = await supabase.from('proposals').select('project_id').in('project_id', projectIds)
+      ;(proposals || []).forEach(p => { proposalCounts[p.project_id] = (proposalCounts[p.project_id] || 0) + 1 })
+    }
+    const total = projects.length
+    const open = projects.filter(p => p.status === 'open').length
+    const totalProposals = Object.values(proposalCounts).reduce((a,b) => a+b, 0)
+    document.getElementById('dash-total').textContent = total
+    document.getElementById('dash-open').innerHTML = `<span>${open}</span>`
+    document.getElementById('dash-proposals').textContent = totalProposals
+    if (total === 0) {
+      wrap.innerHTML = `<div class="dash-empty"><div class="dash-empty-icon">📭</div><div class="dash-empty-title">No projects yet</div><div class="dash-empty-sub">Post your first project and start receiving proposals.</div><button class="btn-primary" onclick="showPage('post')">Post your first project</button></div>`
+      return
+    }
+    wrap.innerHTML = `<div class="project-list">${projects.map(p => {
+      const count = proposalCounts[p.id] || 0
+      return `<div class="project-card">
+        <div style="flex:1">
+          <div class="project-card-title">${p.title}</div>
+          <div class="project-card-meta">
+            <span class="project-meta-tag">${p.platform || '—'}</span>
+            <span class="project-meta-tag">${p.frequency || '—'}</span>
+            <span class="project-meta-tag">${p.timeline || '—'}</span>
+          </div>
+          <div class="project-card-desc">${p.description ? p.description.slice(0,120) + (p.description.length > 120 ? '…' : '') : '—'}</div>
+          ${count > 0 ? `<button class="btn-ghost" style="margin-top:12px; font-size:12px; padding:6px 14px;" onclick="viewProposals('${p.id}', '${p.title.replace(/'/g,"\\'")}')">💬 View ${count} proposal${count > 1 ? 's' : ''}</button>` : '<div style="font-size:12px; color:var(--text-dim); margin-top:12px;">No proposals yet</div>'}
+        </div>
+        <div class="project-card-right">
+          <span class="status-badge ${p.status === 'open' ? 'status-open' : 'status-closed'}">${p.status === 'open' ? '● Open' : '✓ Closed'}</span>
+          <div class="project-budget">${p.budget || '—'}</div>
+          <div class="project-date">${new Date(p.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}</div>
+        </div>
+      </div>`
+    }).join('')}</div>`
+  }
+
+  window.viewProposals = async (projectId, projectTitle) => {
+    const { data: proposals, error } = await supabase
+      .from('proposals')
+      .select('*, profiles(name)')
+      .eq('project_id', projectId)
+      .order('created_at', { ascending: false })
+    if (error || !proposals) { showToast('Error loading proposals'); return }
+    // build modal content
+    const content = proposals.map(p => `
+      <div style="background:var(--bg3); border:0.5px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:12px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:36px; height:36px; border-radius:50%; background:rgba(240,165,0,0.15); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-size:13px; font-weight:700; color:var(--accent);">${(p.profiles?.name || 'FL').slice(0,2).toUpperCase()}</div>
+            <div>
+              <div style="font-size:14px; font-weight:500; color:var(--text);">${p.profiles?.name || 'Freelancer'}</div>
+              <div style="font-size:11px; color:var(--text-dim);">${new Date(p.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}</div>
+            </div>
+          </div>
+          <div style="font-family:var(--font-display); font-size:15px; font-weight:700; color:var(--accent);">${p.rate || 'Rate not specified'}</div>
+        </div>
+        <div style="font-size:13px; color:var(--text-muted); line-height:1.7; font-weight:300; margin-bottom:14px;">${p.message || '—'}</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn-primary" style="font-size:12px; padding:7px 16px;" onclick="closeProposalModal(); startConversation('${p.freelancer_id}', '${(p.profiles?.name||'Freelancer').replace(/'/g,"\\'")}', '${p.project_id}')">💬 Message</button>
+          <button class="btn-primary" style="font-size:12px; padding:7px 16px; background:#4ade80; color:#0d0d0d;" onclick="closeProposalModal(); openPayment('${p.freelancer_id}', '${(p.profiles?.name||'Freelancer').replace(/'/g,"\\'")}', '${p.project_id}', '${projectTitle.replace(/'/g,"\\'")}', '${(p.rate||'').replace(/'/g,"\\'")}')">✓ Hire & Pay</button>
+        </div>
+      </div>`).join('')
+    document.getElementById('proposal-modal-title').textContent = `Proposals for: ${projectTitle}`
+    document.getElementById('proposal-modal-body').innerHTML = content
+    document.getElementById('proposal-viewer-modal').classList.add('open')
+  }
+
+  window.closeProposalModal = () => document.getElementById('proposal-viewer-modal').classList.remove('open')
+
+  // ── FREELANCER PROFILE SETUP ──
+  window.toggleSkill = (el) => el.classList.toggle('selected')
+
+  window.saveFreelancerProfile = async () => {
+    const user = await getUser()
+    if (!user) { showToast('Please log in first'); openAuth('login'); return }
+    const name = document.getElementById('setup-name').value.trim()
+    const role = document.getElementById('setup-role').value
+    const platform = document.getElementById('setup-platform').value
+    const rate = document.getElementById('setup-rate').value.trim()
+    const bio = document.getElementById('setup-bio').value.trim()
+    const available = document.getElementById('setup-available').value === 'true'
+    const skills = [...document.querySelectorAll('.skill-chip.selected')].map(el => el.textContent)
+    if (!name || !role || !bio) { showToast('Please fill in name, role and bio'); return }
+    const btn = document.getElementById('setup-submit-btn')
+    btn.disabled = true; btn.textContent = 'Saving...'
+    const { error } = await supabase.from('freelancer_profiles').upsert({
+      user_id: user.id, role, platform, rate, bio, skills, available
+    }, { onConflict: 'user_id' })
+    // also update display name in profiles table
+    await supabase.from('profiles').update({ name }).eq('id', user.id)
+    btn.disabled = false; btn.textContent = 'Save my profile'
+    if (error) { showToast('❌ Error: ' + error.message); console.error(error) }
+    else { showToast('✅ Profile saved! You\'re now visible on Browse.') }
+  }
+
+  // ── BROWSE — load real freelancers from DB + show static as fallback ──
+  async function loadBrowseGrid(tag = 'all') {
+    const grid = document.getElementById('browse-grid')
+    grid.innerHTML = '<div style="padding:40px; text-align:center; color:var(--text-muted); font-size:14px;">Loading freelancers…</div>'
+    const { data: dbFreelancers, error } = await supabase
+      .from('freelancer_profiles')
+      .select('*, profiles(name)')
+      .eq('available', true)
+    const realCards = (dbFreelancers || []).map((f, i) => ({
+      id: f.id, initials: (f.profiles?.name || 'FL').slice(0,2).toUpperCase(),
+      av: AV_COLORS[i % AV_COLORS.length], name: f.profiles?.name || 'Freelancer',
+      role: f.role, badge: f.platform, badgeClass: PLATFORM_BADGES[f.platform] || 'badge-brand',
+      desc: f.bio?.slice(0,120) + (f.bio?.length > 120 ? '…' : ''),
+      rate: f.rate || 'Contact for rate', stars: '★ New', tag: ROLE_TAGS[f.role] || 'editor',
+      about: f.bio, isReal: true
+    }))
+    const combined = [...realCards, ...STATIC_FREELANCERS]
+    const filtered = tag === 'all' ? combined : combined.filter(f => f.tag === tag)
+    renderGrid('browse-grid', filtered)
+  }
+
+  // ── GRID RENDERING ──
+  function renderGrid(containerId, data) {
+    const el = document.getElementById(containerId)
+    if (!el) return
+    el.innerHTML = data.map(f => `
+      <div class="fcard" onclick="openProfile('${f.id}')">
+        ${f.isReal ? '<span class="fcard-real-badge">✦ Real</span>' : '<div class="fcard-avail"></div>'}
+        <div class="fcard-top">
+          <div class="fcard-avatar ${f.av}">${f.initials}</div>
+          <div><div class="fcard-name">${f.name}</div><div class="fcard-role">${f.role}</div></div>
+        </div>
+        <span class="fcard-badge ${f.badgeClass}">${f.badge}</span>
+        <div class="fcard-desc">${f.desc}</div>
+        <div class="fcard-footer"><span class="fcard-rate">${f.rate}</span><span class="fcard-stars">${f.stars}</span></div>
+      </div>`).join('')
+  }
+
+  // store all loaded freelancers for profile view
+  let allFreelancers = [...STATIC_FREELANCERS]
+
+  window.openProfile = (id) => {
+    const f = allFreelancers.find(x => String(x.id) === String(id))
+    if (!f) return
+    document.getElementById('profile-avatar-lg').className = `profile-avatar-lg ${f.av}`
+    document.getElementById('profile-avatar-lg').textContent = f.initials
+    document.getElementById('profile-name').textContent = f.name
+    document.getElementById('profile-tagline').textContent = f.role + ' · ' + f.badge
+    document.getElementById('profile-rate').textContent = f.rate
+    document.getElementById('profile-rating').textContent = f.stars
+    document.getElementById('profile-badges').innerHTML = `<span class="fcard-badge ${f.badgeClass}">${f.badge}</span>`
+    document.getElementById('profile-about').textContent = f.about || f.desc
+    showPage('profile')
+  }
+
+  window.filterHome = (btn, tag) => {
+    document.querySelectorAll('#home-filters .filter-pill').forEach(b => b.classList.remove('active'))
+    btn.classList.add('active')
+    renderGrid('home-grid', tag === 'all' ? STATIC_FREELANCERS : STATIC_FREELANCERS.filter(f => f.tag === tag))
+  }
+
+  window.filterBrowse = (btn, tag) => {
+    btn.closest('.filter-bar').querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'))
+    btn.classList.add('active')
+    loadBrowseGrid(tag)
+  }
+
+  window.showPage = (name) => {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
+    document.getElementById('page-' + name).classList.add('active')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    if (name === 'browse') loadBrowseGrid()
+    if (name === 'dashboard') loadDashboard()
+    if (name === 'projects') loadProjectsBoard()
+    if (name === 'messages') { loadInbox(); if (activeConvoUserId) openConversation(activeConvoUserId, activeConvoName, activeConvoProjectId) }
+    if (name !== 'messages' && messagePollingInterval) { clearInterval(messagePollingInterval); messagePollingInterval = null }
+  }
+
+  window.doSearch = () => { showPage('browse') }
+  window.searchTag = (tag) => { document.getElementById('hero-input').value = tag; showPage('browse') }
+
+  // ── PROJECTS BOARD (freelancer view) ──
+  let activeProjectId = null
+
+  async function loadProjectsBoard() {
+    const user = await getUser()
+    if (!user) { showPage('home'); openAuth('login'); return }
+    const wrap = document.getElementById('projects-board-wrap')
+    wrap.innerHTML = '<div class="dash-loading">Loading open projects…</div>'
+    const { data: projects, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+    if (error || !projects?.length) {
+      wrap.innerHTML = '<div class="dash-empty"><div class="dash-empty-icon">📭</div><div class="dash-empty-title">No open projects yet</div><div class="dash-empty-sub">Check back soon — creators are posting every day.</div></div>'
+      return
+    }
+    // get proposals already sent by this freelancer
+    const { data: myProposals } = await supabase
+      .from('proposals')
+      .select('project_id')
+      .eq('freelancer_id', user.id)
+    const appliedIds = new Set((myProposals || []).map(p => p.project_id))
+    wrap.innerHTML = `<div class="pboard-list">${projects.map(p => `
+      <div class="pboard-card">
+        <div class="pboard-top">
+          <div>
+            <div class="pboard-title">${p.title}</div>
+            <div class="pboard-meta">
+              <span class="pboard-tag">${p.platform || '—'}</span>
+              <span class="pboard-tag">${p.frequency || '—'}</span>
+              <span class="pboard-tag">${p.timeline || '—'}</span>
+            </div>
+          </div>
+          <span class="status-badge status-open">● Open</span>
+        </div>
+        <div class="pboard-desc">${p.description || '—'}</div>
+        <div class="pboard-footer">
+          <div>
+            <div class="pboard-budget">${p.budget || '—'}</div>
+            <div class="pboard-date">Posted ${new Date(p.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}</div>
+          </div>
+          ${appliedIds.has(p.id)
+            ? '<span class="status-badge" style="background:rgba(74,222,128,0.1);color:#4ade80;border:0.5px solid rgba(74,222,128,0.2)">✓ Proposal sent</span>'
+            : `<button class="btn-primary" onclick="openProposal('${p.id}','${p.title.replace(/'/g,"\\'")}')">Send proposal</button>`
+          }
+        </div>
+      </div>`).join('')}</div>`
+  }
+
+  window.openProposal = (projectId, projectTitle) => {
+    activeProjectId = projectId
+    document.getElementById('proposal-project-title').textContent = projectTitle
+    document.getElementById('proposal-rate').value = ''
+    document.getElementById('proposal-message').value = ''
+    document.getElementById('proposal-error').classList.remove('show')
+    document.getElementById('proposal-success').classList.remove('show')
+    document.getElementById('proposal-modal').classList.add('open')
+  }
+
+  window.closeProposal = () => {
+    document.getElementById('proposal-modal').classList.remove('open')
+  }
+
+  document.getElementById('proposal-modal').addEventListener('click', e => {
+    if (e.target.id === 'proposal-modal') closeProposal()
+  })
+
+  window.submitProposal = async () => {
+    const user = await getUser()
+    if (!user) return
+    const rate = document.getElementById('proposal-rate').value.trim()
+    const message = document.getElementById('proposal-message').value.trim()
+    const errEl = document.getElementById('proposal-error')
+    const sucEl = document.getElementById('proposal-success')
+    const btn = document.getElementById('proposal-submit-btn')
+    if (!message) { errEl.textContent = 'Please write a message.'; errEl.style.display = 'block'; return }
+    btn.disabled = true; btn.textContent = 'Sending…'
+    errEl.style.display = 'none'; sucEl.style.display = 'none'
+    const { error } = await supabase.from('proposals').insert({
+      project_id: activeProjectId,
+      freelancer_id: user.id,
+      message,
+      rate,
+      status: 'pending'
+    })
+    btn.disabled = false; btn.textContent = 'Send proposal'
+    if (error) { errEl.textContent = error.message; errEl.style.display = 'block' }
+    else {
+      sucEl.textContent = '✓ Proposal sent! The creator will be in touch.'
+      sucEl.style.display = 'block'
+      setTimeout(() => { closeProposal(); loadProjectsBoard() }, 1500)
+    }
+  }
+
+
+  // ── MESSAGING ──
+  let activeConvoUserId = null
+  let activeConvoName = null
+  let activeConvoProjectId = null
+  let messagePollingInterval = null
+
+  async function loadInbox() {
+    const user = await getUser()
+    if (!user) return
+    const list = document.getElementById('conversations-list')
+    list.innerHTML = '<div style="padding:24px; color:var(--text-dim); font-size:13px;">Loading…</div>'
+    // get all unique conversations (people user has messaged or received from)
+    const { data: msgs } = await supabase
+      .from('messages')
+      .select('*')
+      .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+      .order('created_at', { ascending: false })
+    if (!msgs || msgs.length === 0) {
+      list.innerHTML = `<div style="padding:32px 20px; text-align:center; color:var(--text-dim); font-size:13px; line-height:1.6;">No messages yet.<br>Start a conversation from a proposal.</div>`
+      return
+    }
+    // get all unique partner IDs
+    const partnerIds = [...new Set(msgs.map(m => m.sender_id === user.id ? m.receiver_id : m.sender_id))]
+    // fetch their names
+    const { data: partnerProfiles } = await supabase.from('profiles').select('id, name').in('id', partnerIds)
+    const nameMap = {}
+    ;(partnerProfiles || []).forEach(p => { nameMap[p.id] = p.name })
+    // group by conversation partner
+    const convos = {}
+    msgs.forEach(m => {
+      const partnerId = m.sender_id === user.id ? m.receiver_id : m.sender_id
+      const partnerName = nameMap[partnerId] || 'User'
+      if (!convos[partnerId]) {
+        convos[partnerId] = { partnerId, partnerName, lastMsg: m.content, lastTime: m.created_at, unread: 0, projectId: m.project_id }
+      }
+      if (m.receiver_id === user.id && !m.read) convos[partnerId].unread++
+    })
+    const convoArr = Object.values(convos)
+    if (convoArr.length === 0) {
+      list.innerHTML = `<div style="padding:32px 20px; text-align:center; color:var(--text-dim); font-size:13px;">No conversations yet.</div>`
+      return
+    }
+    list.innerHTML = convoArr.map(c => `
+      <div class="convo-item ${activeConvoUserId === c.partnerId ? 'active' : ''}" onclick="openConversation('${c.partnerId}', '${(c.partnerName||'').replace(/'/g,"\\'")}', '${c.projectId||''}')">
+        <div class="convo-avatar">${(c.partnerName||'U').slice(0,2).toUpperCase()}</div>
+        <div style="flex:1; min-width:0;">
+          <div class="convo-name">${c.partnerName || 'User'}</div>
+          <div class="convo-preview">${c.lastMsg || '—'}</div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+          <div class="convo-time">${new Date(c.lastTime).toLocaleDateString('en-IN', { day:'numeric', month:'short' })}</div>
+          ${c.unread > 0 ? `<div style="background:var(--accent); color:#0d0d0d; font-size:10px; font-weight:700; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center;">${c.unread}</div>` : ''}
+        </div>
+      </div>`).join('')
+  }
+
+  window.openConversation = async (partnerId, partnerName, projectId) => {
+    activeConvoUserId = partnerId
+    activeConvoName = partnerName
+    activeConvoProjectId = projectId || null
+    // highlight active convo
+    document.querySelectorAll('.convo-item').forEach(el => el.classList.remove('active'))
+    event?.currentTarget?.classList.add('active')
+    // render chat area
+    const chatArea = document.getElementById('chat-area')
+    chatArea.innerHTML = `
+      <div class="chat-header">
+        <div class="convo-avatar">${partnerName.slice(0,2).toUpperCase()}</div>
+        <div>
+          <div class="chat-header-name">${partnerName}</div>
+          <div class="chat-header-sub">via CreatorBridge</div>
+        </div>
+      </div>
+      <div class="chat-messages" id="chat-messages-wrap" style="flex:1; overflow-y:auto; padding:24px; display:flex; flex-direction:column; gap:12px;"></div>
+      <div class="chat-input-area" style="flex-shrink:0;">
+        <textarea class="chat-input" id="chat-msg-input" placeholder="Type a message…" rows="1" onkeydown="handleChatKey(event)"></textarea>
+        <button class="chat-send-btn" onclick="sendMessage()">Send →</button>
+      </div>`
+    await loadMessages()
+    // poll for new messages every 4 seconds
+    if (messagePollingInterval) clearInterval(messagePollingInterval)
+    messagePollingInterval = setInterval(loadMessages, 4000)
+    // mark messages as read
+    const user = await getUser()
+    if (user) await supabase.from('messages').update({ read: true }).eq('sender_id', partnerId).eq('receiver_id', user.id)
+  }
+
+  async function loadMessages() {
+    const user = await getUser()
+    if (!user || !activeConvoUserId) return
+    const wrap = document.getElementById('chat-messages-wrap')
+    if (!wrap) return
+    const { data: msgs } = await supabase
+      .from('messages')
+      .select('*')
+      .or(`and(sender_id.eq.${user.id},receiver_id.eq.${activeConvoUserId}),and(sender_id.eq.${activeConvoUserId},receiver_id.eq.${user.id})`)
+      .order('created_at', { ascending: true })
+    if (!msgs || msgs.length === 0) {
+      wrap.innerHTML = `<div class="chat-empty"><div class="chat-empty-icon">👋</div><div>Say hello to ${activeConvoName}!</div></div>`
+      return
+    }
+    const wasAtBottom = wrap.scrollHeight - wrap.scrollTop <= wrap.clientHeight + 60
+    wrap.innerHTML = msgs.map(m => {
+      const mine = m.sender_id === user.id
+      const time = new Date(m.created_at).toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' })
+      return `<div class="msg-row ${mine ? 'mine' : ''}">
+        ${!mine ? `<div class="msg-av">${activeConvoName.slice(0,2).toUpperCase()}</div>` : ''}
+        <div>
+          <div class="msg-time" style="${mine ? 'text-align:right' : ''}">${time}</div>
+          <div class="msg-bubble ${mine ? 'mine' : 'theirs'}">${m.content}</div>
+        </div>
+      </div>`
+    }).join('')
+    if (wasAtBottom) wrap.scrollTop = wrap.scrollHeight
+  }
+
+  window.handleChatKey = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() }
+  }
+
+  window.sendMessage = async () => {
+    const user = await getUser()
+    if (!user || !activeConvoUserId) return
+    const input = document.getElementById('chat-msg-input')
+    const content = input?.value.trim()
+    if (!content) return
+    input.value = ''
+    const { error } = await supabase.from('messages').insert({
+      sender_id: user.id,
+      receiver_id: activeConvoUserId,
+      project_id: activeConvoProjectId || null,
+      content
+    })
+    if (error) { showToast('❌ Failed to send: ' + error.message); return }
+    await loadMessages()
+    await loadInbox()
+  }
+
+  window.startConversation = async (receiverId, receiverName, projectId) => {
+    // called from proposal viewer — opens messages page with that person
+    activeConvoUserId = receiverId
+    activeConvoName = receiverName
+    activeConvoProjectId = projectId
+    showPage('messages')
+    setTimeout(() => openConversation(receiverId, receiverName, projectId), 300)
+  }
+
+  // ── PAYMENTS ──
+  let paymentData = {}
+  let selectedPayMethod = 'upi'
+
+  window.openPayment = (freelancerId, freelancerName, projectId, projectTitle, suggestedRate) => {
+    paymentData = { freelancerId, freelancerName, projectId, projectTitle, suggestedRate }
+    // reset to step 1
+    goToPayStep1()
+    document.getElementById('pay-freelancer-name').textContent = freelancerName
+    document.getElementById('pay-summary').innerHTML = `
+      <div class="payment-summary-row"><span>Project</span><span>${projectTitle}</span></div>
+      <div class="payment-summary-row"><span>Freelancer</span><span>${freelancerName}</span></div>
+      <div class="payment-summary-row"><span>Suggested rate</span><span>${suggestedRate || 'Not specified'}</span></div>`
+    const amountInput = document.getElementById('pay-amount-input')
+    // pre-fill amount if rate is a number
+    const numMatch = (suggestedRate || '').match(/[\d,]+/)
+    if (numMatch) amountInput.value = numMatch[0].replace(/,/g, '')
+    updatePayFee()
+    amountInput.oninput = updatePayFee
+    document.getElementById('payment-modal').classList.add('open')
+  }
+
+  function updatePayFee() {
+    const amt = parseInt(document.getElementById('pay-amount-input').value) || 0
+    const fee = Math.round(amt * 0.05)
+    const total = amt + fee
+    document.getElementById('pay-platform-fee').textContent = `₹${fee.toLocaleString()}`
+    document.getElementById('pay-total-amount').textContent = `₹${total.toLocaleString()}`
+  }
+
+  window.goToPayStep1 = () => {
+    document.getElementById('pay-screen-1').style.display = 'block'
+    document.getElementById('pay-screen-2').style.display = 'none'
+    document.getElementById('pay-screen-3').style.display = 'none'
+    document.getElementById('pay-step-1').className = 'payment-step active'
+    document.getElementById('pay-step-2').className = 'payment-step'
+    document.getElementById('pay-step-3').className = 'payment-step'
+  }
+
+  window.goToPayStep2 = () => {
+    const amt = parseInt(document.getElementById('pay-amount-input').value)
+    if (!amt || amt < 100) { showToast('Please enter a valid amount (min ₹100)'); return }
+    const total = amt + Math.round(amt * 0.05)
+    document.getElementById('pay-final-amount').textContent = total.toLocaleString()
+    document.getElementById('pay-screen-1').style.display = 'none'
+    document.getElementById('pay-screen-2').style.display = 'block'
+    document.getElementById('pay-step-1').className = 'payment-step done'
+    document.getElementById('pay-step-2').className = 'payment-step active'
+  }
+
+  window.selectPayMethod = (method) => {
+    selectedPayMethod = method
+    ;['upi','card','netbanking','wallet'].forEach(m => {
+      document.getElementById('pm-' + m).classList.toggle('selected', m === method)
+    })
+    const details = {
+      upi: 'Enter your UPI ID below.<input class="modal-input" type="text" id="pay-upi-input" placeholder="yourname@upi" style="margin-top:10px;"/>',
+      card: 'Enter your card details below.<input class="modal-input" type="text" placeholder="Card number" style="margin-top:10px;"/><div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;"><input class="modal-input" type="text" placeholder="MM/YY"/><input class="modal-input" type="text" placeholder="CVV"/></div>',
+      netbanking: 'Select your bank:<select class="modal-input" style="margin-top:10px;"><option>SBI</option><option>HDFC</option><option>ICICI</option><option>Axis</option><option>Kotak</option><option>Other</option></select>',
+      wallet: 'Select wallet:<select class="modal-input" style="margin-top:10px;"><option>Paytm</option><option>PhonePe</option><option>Amazon Pay</option><option>Mobikwik</option></select>'
+    }
+    document.getElementById('pay-method-detail').innerHTML = details[method] || ''
+  }
+
+  window.confirmPayment = async () => {
+    const user = await getUser()
+    if (!user) return
+    const btn = document.getElementById('pay-confirm-btn')
+    btn.disabled = true
+    btn.textContent = 'Processing…'
+    // simulate payment processing delay
+    await new Promise(r => setTimeout(r, 2000))
+    const amt = parseInt(document.getElementById('pay-amount-input').value)
+    const mockPaymentId = 'pay_' + Math.random().toString(36).substr(2,14).toUpperCase()
+    // save to Supabase
+    const { error } = await supabase.from('payments').insert({
+      project_id: paymentData.projectId,
+      creator_id: user.id,
+      freelancer_id: paymentData.freelancerId,
+      amount: amt,
+      currency: 'INR',
+      razorpay_payment_id: mockPaymentId,
+      status: 'completed'
+    })
+    // update project status
+    await supabase.from('projects').update({ status: 'in_progress' }).eq('id', paymentData.projectId)
+    btn.disabled = false
+    btn.textContent = 'Pay now'
+    if (error) { showToast('❌ Payment failed: ' + error.message); return }
+    // show success screen
+    document.getElementById('pay-screen-2').style.display = 'none'
+    document.getElementById('pay-screen-3').style.display = 'block'
+    document.getElementById('pay-step-2').className = 'payment-step done'
+    document.getElementById('pay-step-3').className = 'payment-step active'
+    document.getElementById('pay-success-name').textContent = paymentData.freelancerName
+    document.getElementById('pay-success-id').textContent = mockPaymentId
+    // notify freelancer via message
+    await supabase.from('messages').insert({
+      sender_id: user.id,
+      receiver_id: paymentData.freelancerId,
+      project_id: paymentData.projectId,
+      content: `✅ Payment of ₹${amt.toLocaleString()} has been made for "${paymentData.projectTitle}". Payment ID: ${mockPaymentId}. Looking forward to working with you!`
+    })
+  }
+
+  window.closePayment = () => {
+    document.getElementById('payment-modal').classList.remove('open')
+  }
+
+  // ── SHOW PAGE (updated) ──
+  let toastTimer
+  window.showToast = (msg) => {
+    const t = document.getElementById('toast')
+    document.getElementById('toast-msg').textContent = msg
+    t.classList.add('show')
+    clearTimeout(toastTimer)
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3500)
+  }
+</script>
+</body>
+</html>
