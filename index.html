@@ -875,6 +875,18 @@
 
   window.supabase = supabase
 
+  // ── EMAIL NOTIFICATION HELPER (fire-and-forget) ──
+  async function triggerNotification(type, toUserId, data) {
+    try {
+      await supabase.functions.invoke('send-notification', {
+        body: { type, toUserId, data }
+      })
+      console.log(`✉️ ${type} notification sent to ${toUserId}`)
+    } catch (e) {
+      console.warn('Notification failed (non-blocking):', e)
+    }
+  }
+
   // ── STATIC FALLBACK FREELANCERS ──
   const STATIC_FREELANCERS = [
     { id:'s1', initials:'AK', av:'av-1', name:'Arjun K.', role:'Video editor', badge:'YouTube long-form', badgeClass:'badge-yt', desc:'Story-driven edits for long-form YouTube. Has worked with channels above 500K subs.', rate:'₹3,500/video', stars:'4.9 (82)', tag:'editor', about:'Arjun is a Mumbai-based video editor with 3 years of experience in long-form YouTube content.' },
@@ -1010,6 +1022,23 @@
     if (error) { showToast('❌ Error: ' + error.message) }
     else {
       showToast('🎉 Project posted! Freelancers will reach out shortly.')
+      // ── Notify matching freelancers ──
+      const postedRole = document.getElementById('project-role')?.value
+      const postedTitle = `${postedRole} needed for ${document.getElementById('project-channel')?.value.trim() || 'my channel'}`
+      const postedBudget = document.getElementById('project-budget')?.value || 'Not specified'
+      const postedPlatform = document.getElementById('project-platform')?.value || 'Not specified'
+      supabase.from('freelancer_profiles').select('user_id').eq('role', postedRole).eq('available', true).then(({ data: matchingFL }) => {
+        if (matchingFL && matchingFL.length > 0) {
+          supabase.from('profiles').select('name').eq('id', user.id).single().then(({ data: myProfile }) => {
+            const creatorName = myProfile?.name || user.email.split('@')[0]
+            matchingFL.forEach(f => {
+              if (f.user_id !== user.id) {
+                triggerNotification('project', f.user_id, { creatorName, projectTitle: postedTitle, budget: postedBudget, platform: postedPlatform })
+              }
+            })
+          })
+        }
+      })
       document.getElementById('project-desc').value = ''
       document.getElementById('project-channel').value = ''
       document.getElementById('project-name').value = ''
@@ -1294,6 +1323,19 @@
     else {
       sucEl.textContent = '✓ Proposal sent! The creator will be in touch.'
       sucEl.style.display = 'block'
+      // ── Notify the creator about the new proposal ──
+      supabase.from('projects').select('creator_id, title').eq('id', activeProjectId).single().then(({ data: projData }) => {
+        if (projData) {
+          supabase.from('profiles').select('name').eq('id', user.id).single().then(({ data: myProfile }) => {
+            triggerNotification('proposal', projData.creator_id, {
+              projectTitle: projData.title,
+              freelancerName: myProfile?.name || user.email.split('@')[0],
+              rate,
+              message
+            })
+          })
+        }
+      })
       setTimeout(() => { closeProposal(); loadProjectsBoard() }, 1500)
     }
   }
@@ -1433,6 +1475,12 @@
       content
     })
     if (error) { showToast('❌ Failed to send: ' + error.message); return }
+    // ── Notify the recipient about the new message ──
+    const senderName = user.email.split('@')[0]
+    triggerNotification('message', activeConvoUserId, {
+      senderName,
+      messageContent: content.length > 200 ? content.slice(0, 200) + '…' : content
+    })
     await loadMessages()
     await loadInbox()
   }
@@ -1548,6 +1596,12 @@
       receiver_id: paymentData.freelancerId,
       project_id: paymentData.projectId,
       content: `✅ Payment of ₹${amt.toLocaleString()} has been made for "${paymentData.projectTitle}". Payment ID: ${mockPaymentId}. Looking forward to working with you!`
+    })
+    // ── Notify the freelancer about the payment ──
+    triggerNotification('payment', paymentData.freelancerId, {
+      amount: amt,
+      projectTitle: paymentData.projectTitle,
+      paymentId: mockPaymentId
     })
   }
 
