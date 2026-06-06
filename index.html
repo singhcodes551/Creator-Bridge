@@ -261,6 +261,32 @@
   .skill-chip.selected { background: rgba(240,165,0,0.12); border-color: var(--accent); color: var(--accent); }
   .setup-banner { background: rgba(240,165,0,0.08); border: 0.5px solid rgba(240,165,0,0.2); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 28px; font-size: 13px; color: var(--accent); }
 
+  /* ADMIN DASHBOARD */
+  .admin-header { background: linear-gradient(135deg, #1a0a00, #0d0d0d); border-bottom: 0.5px solid rgba(240,165,0,0.2); padding: 80px 40px 40px; }
+  .admin-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #0d0d0d; background: var(--accent); padding: 4px 12px; border-radius: 99px; margin-bottom: 12px; }
+  .admin-title { font-family: var(--font-display); font-size: 36px; font-weight: 800; letter-spacing: -1px; color: var(--text); margin-bottom: 6px; }
+  .admin-sub { font-size: 14px; color: var(--text-muted); font-weight: 300; }
+  .admin-stats { display: flex; gap: 16px; margin-top: 28px; flex-wrap: wrap; }
+  .admin-stat { background: var(--bg3); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 20px 24px; min-width: 120px; }
+  .admin-stat-n { font-family: var(--font-display); font-size: 32px; font-weight: 800; color: var(--accent); letter-spacing: -1px; }
+  .admin-stat-l { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+  .admin-tabs { display: flex; gap: 0; border-bottom: 0.5px solid var(--border); padding: 0 40px; background: var(--bg2); }
+  .admin-tab { padding: 14px 20px; font-size: 13px; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+  .admin-tab:hover { color: var(--text); }
+  .admin-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+  .admin-content { padding: 32px 40px; }
+  .admin-table { width: 100%; border-collapse: collapse; }
+  .admin-table th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); padding: 10px 16px; text-align: left; border-bottom: 0.5px solid var(--border); }
+  .admin-table td { font-size: 13px; color: var(--text-muted); padding: 14px 16px; border-bottom: 0.5px solid var(--border); vertical-align: middle; }
+  .admin-table tr:hover td { background: var(--bg2); }
+  .admin-table td:first-child { color: var(--text); font-weight: 500; }
+  .admin-type-badge { font-size: 11px; padding: 3px 10px; border-radius: 99px; font-weight: 500; }
+  .admin-type-creator { background: rgba(240,165,0,0.12); color: var(--accent); }
+  .admin-type-freelancer { background: rgba(139,92,246,0.12); color: #a78bfa; }
+  .admin-type-admin { background: rgba(74,222,128,0.12); color: #4ade80; }
+  .admin-loading { text-align: center; padding: 60px; color: var(--text-muted); font-size: 14px; }
+  .admin-empty { text-align: center; padding: 60px; color: var(--text-dim); font-size: 14px; }
+
   @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   .fade-up { animation: fadeUp 0.5s ease both; }
   .delay-1 { animation-delay: 0.1s; }
@@ -353,6 +379,7 @@
     <li id="nav-setup-link" style="display:none"><a href="#" onclick="showPage('setup')" style="color:var(--accent)">My Profile</a></li>
     <li id="nav-messages-link" style="display:none"><a href="#" onclick="showPage('messages')" style="color:var(--accent)" id="nav-messages-label">Messages</a></li>
     <li id="nav-projects-link" style="display:none"><a href="#" onclick="showPage('projects')" style="color:var(--accent)">Find work</a></li>
+    <li id="nav-admin-link" style="display:none"><a href="#" onclick="showPage('admin')" style="color:#4ade80">⚡ Admin</a></li>
   </ul>
   <div class="nav-actions">
     <button class="btn-ghost" id="nav-login-btn">Log in</button>
@@ -836,6 +863,33 @@
   </div>
 </div>
 
+<!-- ADMIN DASHBOARD PAGE -->
+<div id="page-admin" class="page">
+  <div class="admin-header">
+    <div class="admin-badge">⚡ Admin only</div>
+    <div class="admin-title">Admin Dashboard</div>
+    <div class="admin-sub">Full platform overview — visible only to you.</div>
+    <div class="admin-stats">
+      <div class="admin-stat"><div class="admin-stat-n" id="admin-total-users">—</div><div class="admin-stat-l">Total users</div></div>
+      <div class="admin-stat"><div class="admin-stat-n" id="admin-total-creators">—</div><div class="admin-stat-l">Creators</div></div>
+      <div class="admin-stat"><div class="admin-stat-n" id="admin-total-freelancers">—</div><div class="admin-stat-l">Freelancers</div></div>
+      <div class="admin-stat"><div class="admin-stat-n" id="admin-total-projects">—</div><div class="admin-stat-l">Projects</div></div>
+      <div class="admin-stat"><div class="admin-stat-n" id="admin-total-proposals">—</div><div class="admin-stat-l">Proposals</div></div>
+      <div class="admin-stat"><div class="admin-stat-n" id="admin-total-payments">—</div><div class="admin-stat-l">Payments</div></div>
+      <div class="admin-stat"><div class="admin-stat-n" id="admin-total-messages">—</div><div class="admin-stat-l">Messages</div></div>
+    </div>
+  </div>
+  <div class="admin-tabs">
+    <div class="admin-tab active" onclick="switchAdminTab('users', this)">👥 Users</div>
+    <div class="admin-tab" onclick="switchAdminTab('projects', this)">📋 Projects</div>
+    <div class="admin-tab" onclick="switchAdminTab('proposals', this)">💬 Proposals</div>
+    <div class="admin-tab" onclick="switchAdminTab('payments', this)">💰 Payments</div>
+  </div>
+  <div class="admin-content">
+    <div id="admin-tab-content"><div class="admin-loading">Loading…</div></div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"><span>✓</span><span id="toast-msg">Done!</span></div>
 
@@ -874,26 +928,6 @@
   import { signUp, logIn, logOut, getUser } from './auth.js'
 
   window.supabase = supabase
-
-  // ── EMAIL NOTIFICATION HELPER (fire-and-forget) ──
-  async function triggerNotification(type, toUserId, data) {
-    try {
-      const { data: result, error } = await supabase.functions.invoke('send-notification', {
-        body: { type, toUserId, data }
-      })
-      if (error) {
-        console.warn(`Notification failed for ${toUserId}:`, error)
-        return
-      }
-      if (result?.error) {
-        console.warn(`Notification function rejected ${type} for ${toUserId}:`, result)
-        return
-      }
-      console.log(`✉️ ${type} notification sent to ${toUserId}`, result)
-    } catch (e) {
-      console.warn('Notification failed (non-blocking):', e)
-    }
-  }
 
   // ── STATIC FALLBACK FREELANCERS ──
   const STATIC_FREELANCERS = [
@@ -952,6 +986,10 @@
       document.getElementById('nav-projects-link').style.display = 'block'
     }
     document.getElementById('nav-messages-link').style.display = 'block'
+    // check if admin
+    supabase.from('profiles').select('is_admin').eq('id', user.id).single().then(({ data }) => {
+      if (data?.is_admin) document.getElementById('nav-admin-link').style.display = 'block'
+    })
   }
 
   window.handleLogout = async () => { await logOut(); location.reload() }
@@ -1030,23 +1068,6 @@
     if (error) { showToast('❌ Error: ' + error.message) }
     else {
       showToast('🎉 Project posted! Freelancers will reach out shortly.')
-      // ── Notify matching freelancers ──
-      const postedRole = document.getElementById('project-role')?.value
-      const postedTitle = `${postedRole} needed for ${document.getElementById('project-channel')?.value.trim() || 'my channel'}`
-      const postedBudget = document.getElementById('project-budget')?.value || 'Not specified'
-      const postedPlatform = document.getElementById('project-platform')?.value || 'Not specified'
-      supabase.from('freelancer_profiles').select('user_id').eq('role', postedRole).eq('available', true).then(({ data: matchingFL }) => {
-        if (matchingFL && matchingFL.length > 0) {
-          supabase.from('profiles').select('name').eq('id', user.id).single().then(({ data: myProfile }) => {
-            const creatorName = myProfile?.name || user.email.split('@')[0]
-            matchingFL.forEach(f => {
-              if (f.user_id !== user.id) {
-                triggerNotification('project', f.user_id, { creatorName, projectTitle: postedTitle, budget: postedBudget, platform: postedPlatform })
-              }
-            })
-          })
-        }
-      })
       document.getElementById('project-desc').value = ''
       document.getElementById('project-channel').value = ''
       document.getElementById('project-name').value = ''
@@ -1234,6 +1255,7 @@
     if (name === 'dashboard') loadDashboard()
     if (name === 'projects') loadProjectsBoard()
     if (name === 'messages') { loadInbox(); if (activeConvoUserId) openConversation(activeConvoUserId, activeConvoName, activeConvoProjectId) }
+    if (name === 'admin') loadAdminDashboard()
     if (name !== 'messages' && messagePollingInterval) { clearInterval(messagePollingInterval); messagePollingInterval = null }
   }
 
@@ -1331,19 +1353,6 @@
     else {
       sucEl.textContent = '✓ Proposal sent! The creator will be in touch.'
       sucEl.style.display = 'block'
-      // ── Notify the creator about the new proposal ──
-      supabase.from('projects').select('creator_id, title').eq('id', activeProjectId).single().then(({ data: projData }) => {
-        if (projData) {
-          supabase.from('profiles').select('name').eq('id', user.id).single().then(({ data: myProfile }) => {
-            triggerNotification('proposal', projData.creator_id, {
-              projectTitle: projData.title,
-              freelancerName: myProfile?.name || user.email.split('@')[0],
-              rate,
-              message
-            })
-          })
-        }
-      })
       setTimeout(() => { closeProposal(); loadProjectsBoard() }, 1500)
     }
   }
@@ -1483,12 +1492,6 @@
       content
     })
     if (error) { showToast('❌ Failed to send: ' + error.message); return }
-    // ── Notify the recipient about the new message ──
-    const senderName = user.email.split('@')[0]
-    triggerNotification('message', activeConvoUserId, {
-      senderName,
-      messageContent: content.length > 200 ? content.slice(0, 200) + '…' : content
-    })
     await loadMessages()
     await loadInbox()
   }
@@ -1605,16 +1608,135 @@
       project_id: paymentData.projectId,
       content: `✅ Payment of ₹${amt.toLocaleString()} has been made for "${paymentData.projectTitle}". Payment ID: ${mockPaymentId}. Looking forward to working with you!`
     })
-    // ── Notify the freelancer about the payment ──
-    triggerNotification('payment', paymentData.freelancerId, {
-      amount: amt,
-      projectTitle: paymentData.projectTitle,
-      paymentId: mockPaymentId
-    })
   }
 
   window.closePayment = () => {
     document.getElementById('payment-modal').classList.remove('open')
+  }
+
+  // ── ADMIN DASHBOARD ──
+  let currentAdminTab = 'users'
+
+  async function loadAdminDashboard() {
+    const user = await getUser()
+    if (!user) return
+    // verify admin
+    const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single()
+    if (!profile?.is_admin) { showPage('home'); showToast('Access denied'); return }
+
+    // load all stats in parallel
+    const [
+      { count: totalUsers },
+      { count: totalProjects },
+      { count: totalProposals },
+      { count: totalPayments },
+      { count: totalMessages },
+      { data: profiles }
+    ] = await Promise.all([
+      supabase.from('profiles').select('*', { count: 'exact', head: true }),
+      supabase.from('projects').select('*', { count: 'exact', head: true }),
+      supabase.from('proposals').select('*', { count: 'exact', head: true }),
+      supabase.from('payments').select('*', { count: 'exact', head: true }),
+      supabase.from('messages').select('*', { count: 'exact', head: true }),
+      supabase.from('profiles').select('type')
+    ])
+
+    const creators = (profiles || []).filter(p => p.type === 'creator').length
+    const freelancers = (profiles || []).filter(p => p.type === 'freelancer').length
+
+    document.getElementById('admin-total-users').textContent = totalUsers || 0
+    document.getElementById('admin-total-creators').textContent = creators
+    document.getElementById('admin-total-freelancers').textContent = freelancers
+    document.getElementById('admin-total-projects').textContent = totalProjects || 0
+    document.getElementById('admin-total-proposals').textContent = totalProposals || 0
+    document.getElementById('admin-total-payments').textContent = totalPayments || 0
+    document.getElementById('admin-total-messages').textContent = totalMessages || 0
+
+    await loadAdminTab('users')
+  }
+
+  async function loadAdminTab(tab) {
+    currentAdminTab = tab
+    const wrap = document.getElementById('admin-tab-content')
+    wrap.innerHTML = '<div class="admin-loading">Loading…</div>'
+
+    if (tab === 'users') {
+      const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false })
+      if (error || !data?.length) { wrap.innerHTML = '<div class="admin-empty">No users yet.</div>'; return }
+      wrap.innerHTML = `<table class="admin-table">
+        <thead><tr>
+          <th>Name</th><th>Email</th><th>Type</th><th>Admin</th><th>Joined</th>
+        </tr></thead>
+        <tbody>${data.map(u => `<tr>
+          <td>${u.name || '—'}</td>
+          <td style="color:var(--text-muted)">${u.id}</td>
+          <td><span class="admin-type-badge admin-type-${u.type || 'creator'}">${u.type || 'creator'}</span></td>
+          <td>${u.is_admin ? '<span style="color:#4ade80">✓ Admin</span>' : '—'}</td>
+          <td>${u.created_at ? new Date(u.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '—'}</td>
+        </tr>`).join('')}</tbody>
+      </table>`
+    }
+
+    else if (tab === 'projects') {
+      const { data, error } = await supabase.from('projects').select('*').order('created_at', { ascending: false })
+      if (error || !data?.length) { wrap.innerHTML = '<div class="admin-empty">No projects yet.</div>'; return }
+      wrap.innerHTML = `<table class="admin-table">
+        <thead><tr>
+          <th>Title</th><th>Platform</th><th>Budget</th><th>Status</th><th>Posted</th>
+        </tr></thead>
+        <tbody>${data.map(p => `<tr>
+          <td>${p.title || '—'}</td>
+          <td>${p.platform || '—'}</td>
+          <td style="color:var(--accent)">${p.budget || '—'}</td>
+          <td><span class="status-badge ${p.status === 'open' ? 'status-open' : 'status-closed'}">${p.status === 'open' ? '● Open' : p.status || '—'}</span></td>
+          <td>${new Date(p.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}</td>
+        </tr>`).join('')}</tbody>
+      </table>`
+    }
+
+    else if (tab === 'proposals') {
+      const { data, error } = await supabase.from('proposals').select('*, profiles(name)').order('created_at', { ascending: false })
+      if (error || !data?.length) { wrap.innerHTML = '<div class="admin-empty">No proposals yet.</div>'; return }
+      wrap.innerHTML = `<table class="admin-table">
+        <thead><tr>
+          <th>Freelancer</th><th>Rate</th><th>Status</th><th>Message preview</th><th>Sent</th>
+        </tr></thead>
+        <tbody>${data.map(p => `<tr>
+          <td>${p.profiles?.name || '—'}</td>
+          <td style="color:var(--accent)">${p.rate || '—'}</td>
+          <td><span class="admin-type-badge" style="background:rgba(240,165,0,0.1);color:var(--accent)">${p.status || 'pending'}</span></td>
+          <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.message?.slice(0,60) || '—'}${p.message?.length > 60 ? '…' : ''}</td>
+          <td>${new Date(p.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}</td>
+        </tr>`).join('')}</tbody>
+      </table>`
+    }
+
+    else if (tab === 'payments') {
+      const { data, error } = await supabase.from('payments').select('*').order('created_at', { ascending: false })
+      if (error || !data?.length) { wrap.innerHTML = '<div class="admin-empty">No payments yet.</div>'; return }
+      const totalRevenue = data.filter(p => p.status === 'completed').reduce((sum, p) => sum + (p.amount || 0), 0)
+      const platformRevenue = Math.round(totalRevenue * 0.05)
+      wrap.innerHTML = `
+        <div style="display:flex; gap:16px; margin-bottom:24px; flex-wrap:wrap;">
+          <div class="admin-stat"><div class="admin-stat-n">₹${totalRevenue.toLocaleString()}</div><div class="admin-stat-l">Total GMV</div></div>
+          <div class="admin-stat"><div class="admin-stat-n" style="color:#4ade80">₹${platformRevenue.toLocaleString()}</div><div class="admin-stat-l">Platform revenue (5%)</div></div>
+        </div>
+        <table class="admin-table">
+          <thead><tr><th>Payment ID</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody>${data.map(p => `<tr>
+            <td style="font-family:monospace; font-size:12px;">${p.razorpay_payment_id || '—'}</td>
+            <td style="color:var(--accent); font-family:var(--font-display); font-weight:700;">₹${(p.amount || 0).toLocaleString()}</td>
+            <td><span class="status-badge status-open">${p.status || '—'}</span></td>
+            <td>${new Date(p.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}</td>
+          </tr>`).join('')}</tbody>
+        </table>`
+    }
+  }
+
+  window.switchAdminTab = (tab, el) => {
+    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'))
+    el.classList.add('active')
+    loadAdminTab(tab)
   }
 
   // ── SHOW PAGE (updated) ──
