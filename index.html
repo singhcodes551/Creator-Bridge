@@ -878,10 +878,18 @@
   // ── EMAIL NOTIFICATION HELPER (fire-and-forget) ──
   async function triggerNotification(type, toUserId, data) {
     try {
-      await supabase.functions.invoke('send-notification', {
+      const { data: result, error } = await supabase.functions.invoke('send-notification', {
         body: { type, toUserId, data }
       })
-      console.log(`✉️ ${type} notification sent to ${toUserId}`)
+      if (error) {
+        console.warn(`Notification failed for ${toUserId}:`, error)
+        return
+      }
+      if (result?.error) {
+        console.warn(`Notification function rejected ${type} for ${toUserId}:`, result)
+        return
+      }
+      console.log(`✉️ ${type} notification sent to ${toUserId}`, result)
     } catch (e) {
       console.warn('Notification failed (non-blocking):', e)
     }
