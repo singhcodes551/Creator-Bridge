@@ -1674,9 +1674,10 @@
 
   window.openReviewForProject = async (projectId, projectTitle) => {
     // find the freelancer who was paid for this project
-    const { data: payment } = await supabase.from('payments').select('freelancer_id, profiles(name)').eq('project_id', projectId).eq('status', 'completed').single()
+    const { data: payments } = await supabase.from('payments').select('freelancer_id, freelancer:profiles!payments_freelancer_id_fkey(name)').eq('project_id', projectId).eq('status', 'completed').limit(1)
+    const payment = payments?.[0]
     if (!payment) { showToast('No completed payment found for this project'); return }
-    reviewData = { projectId, freelancerId: payment.freelancer_id, freelancerName: payment.profiles?.name || 'Freelancer' }
+    reviewData = { projectId, freelancerId: payment.freelancer_id, freelancerName: payment.freelancer?.name || 'Freelancer' }
     document.getElementById('review-freelancer-name').textContent = `Review for ${reviewData.freelancerName} · ${projectTitle}`
     selectedRating = 0
     document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'))
