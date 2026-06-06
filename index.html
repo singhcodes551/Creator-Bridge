@@ -261,6 +261,13 @@
   .skill-chip.selected { background: rgba(240,165,0,0.12); border-color: var(--accent); color: var(--accent); }
   .setup-banner { background: rgba(240,165,0,0.08); border: 0.5px solid rgba(240,165,0,0.2); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 28px; font-size: 13px; color: var(--accent); }
 
+  /* REVIEWS */
+  .star-rating { display: flex; gap: 6px; margin: 12px 0; }
+  .star-btn { font-size: 28px; cursor: pointer; color: var(--text-dim); transition: color 0.15s, transform 0.1s; background: none; border: none; padding: 0; line-height: 1; }
+  .star-btn:hover, .star-btn.active { color: var(--accent); transform: scale(1.1); }
+  .review-stars { color: var(--accent); font-size: 13px; letter-spacing: 1px; }
+  .review-stars-empty { color: var(--text-dim); }
+
   /* ADMIN DASHBOARD */
   .admin-header { background: linear-gradient(135deg, #1a0a00, #0d0d0d); border-bottom: 0.5px solid rgba(240,165,0,0.2); padding: 80px 40px 40px; }
   .admin-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #0d0d0d; background: var(--accent); padding: 4px 12px; border-radius: 99px; margin-bottom: 12px; }
@@ -890,6 +897,35 @@
   </div>
 </div>
 
+<!-- REVIEW MODAL -->
+<div class="modal-overlay" id="review-modal">
+  <div class="modal" style="max-width:460px;">
+    <button class="modal-close" onclick="closeReview()">✕</button>
+    <div class="modal-logo" style="margin-bottom:4px;">Leave a review</div>
+    <div id="review-freelancer-name" style="font-size:13px; color:var(--text-muted); margin-bottom:24px; font-weight:300;"></div>
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      <div>
+        <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); margin-bottom:8px;">Rating</div>
+        <div class="star-rating" id="star-rating">
+          <button class="star-btn" onclick="setRating(1)" data-star="1">★</button>
+          <button class="star-btn" onclick="setRating(2)" data-star="2">★</button>
+          <button class="star-btn" onclick="setRating(3)" data-star="3">★</button>
+          <button class="star-btn" onclick="setRating(4)" data-star="4">★</button>
+          <button class="star-btn" onclick="setRating(5)" data-star="5">★</button>
+        </div>
+        <div id="rating-label" style="font-size:12px; color:var(--text-dim);">Click a star to rate</div>
+      </div>
+      <div>
+        <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); margin-bottom:8px;">Your review</div>
+        <textarea class="modal-input" id="review-comment" rows="4" placeholder="How was working with this freelancer? Quality of work, communication, turnaround time…" style="resize:vertical; line-height:1.6;"></textarea>
+      </div>
+      <div class="modal-error" id="review-error"></div>
+      <div class="modal-success" id="review-success"></div>
+      <button class="modal-btn" id="review-submit-btn" onclick="submitReview()">Submit review</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"><span>✓</span><span id="toast-msg">Done!</span></div>
 
@@ -1111,6 +1147,7 @@
           </div>
           <div class="project-card-desc">${p.description ? p.description.slice(0,120) + (p.description.length > 120 ? '…' : '') : '—'}</div>
           ${count > 0 ? `<button class="btn-ghost" style="margin-top:12px; font-size:12px; padding:6px 14px;" onclick="viewProposals('${p.id}', '${p.title.replace(/'/g,"\\'")}')">💬 View ${count} proposal${count > 1 ? 's' : ''}</button>` : '<div style="font-size:12px; color:var(--text-dim); margin-top:12px;">No proposals yet</div>'}
+          ${p.status === 'in_progress' || p.status === 'completed' ? `<button class="btn-ghost" style="margin-top:8px; font-size:12px; padding:6px 14px; border-color:var(--accent); color:var(--accent);" onclick="openReviewForProject('${p.id}', '${p.title.replace(/'/g,"\\'")}')">⭐ Leave a review</button>` : ''}
         </div>
         <div class="project-card-right">
           <span class="status-badge ${p.status === 'open' ? 'status-open' : 'status-closed'}">${p.status === 'open' ? '● Open' : '✓ Closed'}</span>
@@ -1221,7 +1258,7 @@
   // store all loaded freelancers for profile view
   let allFreelancers = [...STATIC_FREELANCERS]
 
-  window.openProfile = (id) => {
+  window.openProfile = async (id) => {
     const f = allFreelancers.find(x => String(x.id) === String(id))
     if (!f) return
     document.getElementById('profile-avatar-lg').className = `profile-avatar-lg ${f.av}`
@@ -1232,6 +1269,23 @@
     document.getElementById('profile-rating').textContent = f.stars
     document.getElementById('profile-badges').innerHTML = `<span class="fcard-badge ${f.badgeClass}">${f.badge}</span>`
     document.getElementById('profile-about').textContent = f.about || f.desc
+    // load real reviews if it's a real freelancer
+    if (f.isReal && f.userId) {
+      const { data: reviews } = await supabase.from('reviews').select('*, profiles(name)').eq('freelancer_id', f.userId).order('created_at', { ascending: false })
+      const reviewWrap = document.querySelector('#page-profile .review-card')?.parentElement
+      if (reviewWrap && reviews?.length > 0) {
+        const stars = (n) => '★'.repeat(n) + '☆'.repeat(5-n)
+        reviewWrap.innerHTML = reviews.map(r => `
+          <div class="review-card">
+            <div class="review-top">
+              <div class="reviewer-av">${(r.profiles?.name || 'C').slice(0,2).toUpperCase()}</div>
+              <div><div class="reviewer-name">${r.profiles?.name || 'Creator'}</div><div class="reviewer-date">${new Date(r.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}</div></div>
+              <div style="margin-left:auto; color:var(--accent); font-size:14px;">${stars(r.rating)}</div>
+            </div>
+            <div class="review-text">${r.comment}</div>
+          </div>`).join('')
+      }
+    }
     showPage('profile')
   }
 
@@ -1612,6 +1666,61 @@
 
   window.closePayment = () => {
     document.getElementById('payment-modal').classList.remove('open')
+  }
+
+  // ── REVIEWS ──
+  let reviewData = { projectId: null, freelancerId: null, freelancerName: null }
+  let selectedRating = 0
+
+  window.openReviewForProject = async (projectId, projectTitle) => {
+    // find the freelancer who was paid for this project
+    const { data: payment } = await supabase.from('payments').select('freelancer_id, profiles(name)').eq('project_id', projectId).eq('status', 'completed').single()
+    if (!payment) { showToast('No completed payment found for this project'); return }
+    reviewData = { projectId, freelancerId: payment.freelancer_id, freelancerName: payment.profiles?.name || 'Freelancer' }
+    document.getElementById('review-freelancer-name').textContent = `Review for ${reviewData.freelancerName} · ${projectTitle}`
+    selectedRating = 0
+    document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'))
+    document.getElementById('rating-label').textContent = 'Click a star to rate'
+    document.getElementById('review-comment').value = ''
+    document.getElementById('review-error').classList.remove('show')
+    document.getElementById('review-success').classList.remove('show')
+    document.getElementById('review-modal').classList.add('open')
+  }
+
+  window.setRating = (rating) => {
+    selectedRating = rating
+    const labels = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent!']
+    document.getElementById('rating-label').textContent = `${rating}/5 — ${labels[rating]}`
+    document.querySelectorAll('.star-btn').forEach(b => {
+      b.classList.toggle('active', parseInt(b.dataset.star) <= rating)
+    })
+  }
+
+  window.closeReview = () => document.getElementById('review-modal').classList.remove('open')
+
+  window.submitReview = async () => {
+    const user = await getUser()
+    if (!user) return
+    if (!selectedRating) { document.getElementById('review-error').textContent = 'Please select a rating.'; document.getElementById('review-error').classList.add('show'); return }
+    const comment = document.getElementById('review-comment').value.trim()
+    if (!comment) { document.getElementById('review-error').textContent = 'Please write a comment.'; document.getElementById('review-error').classList.add('show'); return }
+    const btn = document.getElementById('review-submit-btn')
+    btn.disabled = true; btn.textContent = 'Submitting…'
+    document.getElementById('review-error').classList.remove('show')
+    const { error } = await supabase.from('reviews').upsert({
+      project_id: reviewData.projectId,
+      creator_id: user.id,
+      freelancer_id: reviewData.freelancerId,
+      rating: selectedRating,
+      comment
+    }, { onConflict: 'project_id,creator_id' })
+    btn.disabled = false; btn.textContent = 'Submit review'
+    if (error) { document.getElementById('review-error').textContent = error.message; document.getElementById('review-error').classList.add('show') }
+    else {
+      document.getElementById('review-success').textContent = '✓ Review submitted! Thank you.'
+      document.getElementById('review-success').classList.add('show')
+      setTimeout(() => closeReview(), 1500)
+    }
   }
 
   // ── ADMIN DASHBOARD ──
